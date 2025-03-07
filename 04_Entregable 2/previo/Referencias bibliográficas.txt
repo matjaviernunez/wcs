@@ -1,0 +1,6 @@
+FAO - Guidelines for Developing Data Dictionaries
+CITES Database Standards
+UNODC Wildlife and Forest Crime Analytic Toolkit
+ISO 11179 Metadata Registry Standard
+
+https://inen.isolutions.iso.org/obp/ui/#iso:std:iso-iec:11179:-1:ed-4:v1:en
