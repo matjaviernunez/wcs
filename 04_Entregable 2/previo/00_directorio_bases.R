@@ -23,6 +23,8 @@ resumen_archivos <- data.frame(archivos) |>
                              T ~ "ag"),
          diccionario = "",
          observacion = "") |> 
-  select(-a3, -a4, -a5)
+  select(-a3, -a4, -a5) %>% 
+  mutate(orden = str_pad(row_number(), 2, "left", "0")) %>% 
+  select(9, 1:8)
 
 export(resumen_archivos, paste0("04_Entregable 2/previo/resumen_bdd_", Sys.Date(), ".xlsx"))
