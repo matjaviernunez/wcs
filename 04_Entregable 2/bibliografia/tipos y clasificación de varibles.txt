@@ -1,0 +1,38 @@
+Tipos de variables según ISO/IEC 11404:2007
+
+Lógica (V/F)
+Categórica (ordinal o no ordinal)
+Cadena (character/string)
+Fecha y Hora (Date-and-time)
+Numérica(entero, racional, real y complejo)
+
+
+Clasificación de variables alineadas a ISO/IEC 11179
+
+1. Identificación
+Variables que sirven para identificar de manera única un registro o entidad en la base de datos.
+Ejemplo: ID_incidente, ID_especie
+
+2. Descripción
+Variables que proporcionan información cualitativa o categórica sobre un objeto de estudio.
+Ejemplo: especie, tipo_tráfico
+
+3. Localización
+Variables que indican ubicaciones generales sin coordenadas geográficas.
+Ejemplo: pais_origen, pais_destino, ciudad_incidente
+
+4. Geolocalización
+Variables que incluyen coordenadas geográficas específicas o información espacial detallada.
+Ejemplo: latitud, longitud
+
+5. Transacción o Evento
+Variables que describen acciones, eventos o intercambios en el contexto del tráfico de vida silvestre.
+Ejemplo: fecha_incidente, cantidad, tipo_tráfico
+
+6. Temporalidad
+Variables que representan momentos en el tiempo más allá del evento en sí, como períodos de análisis o duración de un proceso.
+Ejemplo: fecha_reporte, fecha_actualización
+
+7. Reglas y Estado
+Variables que indican validaciones, estados o conformidad con normativas.
+Ejemplo: estatus_verificación, nivel_riesgo
