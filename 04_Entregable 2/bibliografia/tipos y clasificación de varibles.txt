@@ -1,10 +1,10 @@
-Tipos de variables según ISO/IEC 11404:2007
+Tipos de variables según ISO/IEC 11404:2007 (Formato de datos)
 
 Lógica (V/F)
 Categórica (ordinal o no ordinal)
 Cadena (character/string)
 Fecha y Hora (Date-and-time)
-Numérica(entero, racional, real y complejo)
+Numérica (entero, racional, real y complejo)
 
 
 Clasificación de variables alineadas a ISO/IEC 11179
