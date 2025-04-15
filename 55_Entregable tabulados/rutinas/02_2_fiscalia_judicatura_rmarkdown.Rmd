@@ -1,35 +1,141 @@
 ---
-title: "Fiscalia y Judicatura"
+title: Fiscalia y Judicatura
 output:
-  html_document: default
-  word_document: default
+  pdf_document:
+    toc: yes
+    df_print: kable
+    number_sections: no
+  html_document:
+    number_sections: yes
+    toc: yes
+    theme: bootstrap
+    highlight: tango
+    df_print: kable
+params:
+  mes: NULL
 date: "2025-04-15"
 ---
 
 # Fiscalia
 
-La base de datos de Fiscalía tiene un total de `r dim(fiscalia)[1]`, al utilizar la variable "d_NDD" como identificador único de cada registro se pudo constatar que existen `r n_distinct(fiscalia$d_NDD)`
+La base de datos de Fiscalía tiene un total de `r dim(fiscalia)[1]`, al utilizar la variable "d_NDD" como identificador único de cada registro se pudo constatar que existen `r n_distinct(fiscalia$d_NDD)` registros diferentes.
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+En la siguiente tabla se presentan el número de casos presentes en la base de datos por año.
+
+## Número de casos por año
+
+```{r echo=F, message=F, warning=F, results='markup'}
+fiscalia %>% 
+  group_by(anio = d_ANIO_REGISTRO) %>% 
+  summarise(casos = n()) %>% 
+  adorn_totals()
+```
+Se solicitó realizar el número de casos por taxón, pero esta información no está presente en la base de datos. En la siguiente tabla se presenta el número de casos por Provincia y año.
+
+## Número de casos por provincia y año
+
+```{r echo=F, message=F, warning=F, results='markup'}
+fiscalia %>% 
+  group_by(Provincia  = d_PROVINCIA_INCIDENTE, anio = d_ANIO_REGISTRO) %>% 
+  summarise(casos = n()) %>% 
+  pivot_wider(names_from = anio, values_from = casos, names_prefix = "anio_", values_fill = 0) %>% 
+  adorn_totals() %>% 
+  adorn_totals("col")
+```
+## Gráfico de calor de número de casos por provincia
+```{r echo=F, message=F, warning=F, results='markup', fig.width=10, fig.height=6}
+provincias %>% 
+  left_join(fiscalia %>% 
+              group_by(DPA_PROVIN) %>% 
+              summarise(casos = n())) %>% 
+  ggplot() + 
+  geom_sf(aes(fill = casos)) +
+  scale_fill_distiller(trans = "reverse")
 ```
 
-## R Markdown
+Finalmente se presenta un gráfico tipo raster del número de casos por año y mes.
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+## Número de casos por año y mes
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+```{r echo=F, message=F, warning=F, results='markup', fig.width=10, fig.height=6}
+fiscalia %>% 
+  group_by(anios = d_ANIO_REGISTRO, meses = d_MES_REGISTRO) %>% 
+  summarise(`Número de casos` = n()) %>%  
+  ggplot(aes(meses, anios)) +
+  geom_raster(aes(fill = `Número de casos`), 
+              hjust = 0.5, 
+              vjust = 0.5, 
+              interpolate = FALSE) +
+  scale_fill_distiller(trans = "reverse") +
+  scale_x_continuous(breaks = c(0:11)) +
+  labs(x = "Mes",
+       y = "Año") +
+  theme(panel.background = element_blank(),
+        panel.grid = element_blank(),
+        panel.border = element_rect(colour = "black", fill = NA))
 ```
 
-## Including Plots
 
-You can also embed plots, for example:
+# Judicatura
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+La data proveniente de la Judicatura es un archivo excel compuesto por tres pestañas "Causas Ingresadas", "Causas Resueltas" y "Causas Razón de ejecutoría", utilizando la variable "IDJUICIO" se pudo verificar que los juicios presentes en la primera pestaña contenían los juicios de la pesataña 2 y 3, sin embargo, en ninguna de las pestañas el "IDJUICIO" era único, para poder vincular las tres pestañas en una sola se debieron utilizar las variables "IDJUICIO", "PROVINCIA", "CANTON" e "INSTANCIA".
+
+La base de datos resultante de Judicatura tiene un total de `r dim(judicatura)[1]`, al utilizar la variable "IDJUICIO" como identificador único de cada registro se pudo constatar que existen `r n_distinct(judicatura$IDJUICIO)` registros diferentes.
+
+En la siguiente tabla se presentan el número de casos presentes en la base de datos por año.
+
+## Número de casos por año
+
+```{r echo=F, message=F, warning=F, results='markup'}
+judicatura %>% 
+  group_by(anio = substr(as.character(`FECHA INGRESO`), 1, 4)) %>% 
+  summarise(casos = n()) %>% 
+  adorn_totals()
+```
+Se solicitó realizar el número de casos por taxón, pero esta información no está presente en la base de datos. En la siguiente tabla se presenta el número de casos por Provincia y año.
+
+## Número de casos por provincia y año
+
+```{r echo=F, message=F, warning=F, results='markup'}
+judicatura %>% 
+  group_by(Provincia  = PROVINCIA, anio = substr(as.character(`FECHA INGRESO`), 1, 4)) %>% 
+  summarise(casos = n()) %>% 
+  pivot_wider(names_from = anio, values_from = casos, values_fill = 0) %>% 
+  adorn_totals() %>% 
+  adorn_totals("col")
+```
+## Gráfico de calor de número de casos por provincia
+```{r echo=F, message=F, warning=F, results='markup', fig.width=10, fig.height=6}
+provincias %>% 
+  left_join(judicatura %>% 
+              group_by(DPA_PROVIN) %>% 
+              summarise(casos = n())) %>% 
+  ggplot() + 
+  geom_sf(aes(fill = casos)) +
+   scale_fill_distiller(trans = "reverse")
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+Finalmente se presenta un gráfico tipo raster del número de casos por año y mes.
+
+## Número de casos por año y mes
+
+```{r echo=F, message=F, warning=F, results='markup', fig.width=10, fig.height=6}
+judicatura %>% 
+  group_by(anios = substr(as.character(`FECHA INGRESO`), 1, 4),
+           meses = substr(as.character(`FECHA INGRESO`), 6, 7)) %>% 
+  summarise(`Número de casos` = n()) %>%  
+  ggplot(aes(meses, anios)) +
+  geom_raster(aes(fill = `Número de casos`), 
+              hjust = 0.5, 
+              vjust = 0.5, 
+              interpolate = FALSE) +
+  scale_fill_distiller(trans = "reverse") +
+  #scale_x_continuous(breaks = c(0:11)) +
+  labs(x = "Mes",
+       y = "Año") +
+  theme(panel.background = element_blank(),
+        panel.grid = element_blank(),
+        panel.border = element_rect(colour = "black", fill = NA))
+```
+
+
