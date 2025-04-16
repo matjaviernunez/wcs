@@ -84,6 +84,12 @@ rm(judicatura_ci, judicatura_cr, judicatura_cre)
 provincias <- read_sf("55_Entregable tabulados/insumos/provincias.gpkg")
 
 render(input="55_Entregable tabulados/rutinas/02_2_fiscalia_judicatura_rmarkdown.Rmd",
+       output_format="pdf_document", 
+       output_dir = "55_Entregable tabulados/productos/",
+       output_file = "informe_02_fiscalia_judicatura.pdf",
+       knit_root_dir = getwd())
+
+render(input="55_Entregable tabulados/rutinas/02_2_fiscalia_judicatura_rmarkdown.Rmd",
        output_format="html_document", 
        output_dir = "55_Entregable tabulados/productos/",
        output_file = "informe_02_fiscalia_judicatura.html",

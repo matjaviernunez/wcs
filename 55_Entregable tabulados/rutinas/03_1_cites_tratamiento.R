@@ -1,10 +1,12 @@
 rm(list = ls())
 
 library(tidyverse)
-library(import)
+library(rio)
+library(openxlsx)
 
 cites24 <- import("02_Bases de Datos 2025/MAATE/BIODOVERSIDAD/CITES/Informe CITES 2024.xlsx",
                   sheet = "Exportación - Reexportación")
 
-cites22_23 <- import("55_Entregable tabulados/insumos/03_cites/Matriz permisos CITES 2022 y 2023 ag.xlsx",
-                     sheet = 1, col_types = "text")
+
+cites22_23 <- read.xlsx("02_Bases de Datos 2025/MAATE/BIODOVERSIDAD/CITES/Matriz permisos CITES 2022 y 2023.xlsx",
+                     sheet = 1, detectDates = T, fillMergedCells = T)

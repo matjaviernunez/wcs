@@ -38,7 +38,7 @@ Se solicitó realizar el número de casos por taxón, pero esta información no 
 fiscalia %>% 
   group_by(Provincia  = d_PROVINCIA_INCIDENTE, anio = d_ANIO_REGISTRO) %>% 
   summarise(casos = n()) %>% 
-  pivot_wider(names_from = anio, values_from = casos, names_prefix = "anio_", values_fill = 0) %>% 
+  pivot_wider(names_from = anio, values_from = casos, values_fill = 0) %>% 
   adorn_totals() %>% 
   adorn_totals("col")
 ```
@@ -100,6 +100,7 @@ Se solicitó realizar el número de casos por taxón, pero esta información no 
 judicatura %>% 
   group_by(Provincia  = PROVINCIA, anio = substr(as.character(`FECHA INGRESO`), 1, 4)) %>% 
   summarise(casos = n()) %>% 
+  arrange(anio) |> 
   pivot_wider(names_from = anio, values_from = casos, values_fill = 0) %>% 
   adorn_totals() %>% 
   adorn_totals("col")
