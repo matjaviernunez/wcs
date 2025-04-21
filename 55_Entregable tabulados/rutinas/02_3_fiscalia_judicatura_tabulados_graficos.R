@@ -53,7 +53,7 @@ img02f <- fiscalia %>%
        y = "Año") +
   theme(panel.background = element_blank(),
         panel.grid = element_blank(),
-        panel.border = element_rect(colour = "black", fill = NA))
+        panel.border = element_rect(colour = "black", fill = NA), legend.position = "bottom")
 
 
 # Número de casos por año y mes Sierra
@@ -73,7 +73,8 @@ img03f <- fiscalia %>%
        y = "Año") +
   theme(panel.background = element_blank(),
         panel.grid = element_blank(),
-        panel.border = element_rect(colour = "black", fill = NA))
+        panel.border = element_rect(colour = "black", fill = NA), 
+        legend.position = "bottom")
 
 # Número de casos por año y mes Costa
 
@@ -92,7 +93,8 @@ img04f <- fiscalia %>%
        y = "Año") +
   theme(panel.background = element_blank(),
         panel.grid = element_blank(),
-        panel.border = element_rect(colour = "black", fill = NA))
+        panel.border = element_rect(colour = "black", fill = NA), 
+        legend.position = "bottom")
 
 # Número de casos por año y mes Costa
 
@@ -111,7 +113,8 @@ img05f <- fiscalia %>%
        y = "Año") +
   theme(panel.background = element_blank(),
         panel.grid = element_blank(),
-        panel.border = element_rect(colour = "black", fill = NA))
+        panel.border = element_rect(colour = "black", fill = NA), 
+        legend.position = "bottom")
 
 ##### JUDICATURA
 # Número de casos por año
@@ -131,6 +134,14 @@ tabla02j <- judicatura %>%
   arrange(desc(Total)) |> 
   adorn_totals()
 
+tabla03j <- judicatura |> 
+  mutate(anio = substr(as.character(`FECHA INGRESO`), 1, 4)) |> 
+  group_by(anio) |> 
+  summarise(ingresado = n(),
+            resuelto = sum(causas_resueltas),
+            prop_resuelto = round(100 * resuelto/ingresado, 1),
+            ejecutado = sum(causas_ejecutoria),
+            prop_ejecutado = round(100 * ejecutado/ingresado, 1)) 
 ## Gráfico de calor de número de casos por provincia
 
 img01j <- provincias %>% 
@@ -165,7 +176,8 @@ img02j <- data.frame(anios = c(sort(rep(c("2019", "2020", "2021", "2022", "2023"
        y = "Año") +
   theme(panel.background = element_blank(),
         panel.grid = element_blank(),
-        panel.border = element_rect(colour = "black", fill = NA))
+        panel.border = element_rect(colour = "black", fill = NA), 
+        legend.position = "bottom")
 
 
 ## Número de casos por año y mes Sierra
@@ -191,7 +203,8 @@ img03j <- data.frame(anios = c(sort(rep(c("2019", "2020", "2021", "2022", "2023"
        y = "Año") +
   theme(panel.background = element_blank(),
         panel.grid = element_blank(),
-        panel.border = element_rect(colour = "black", fill = NA))
+        panel.border = element_rect(colour = "black", fill = NA), 
+        legend.position = "bottom")
 
 ## Número de casos por año y mes Costa
 
@@ -216,7 +229,8 @@ img04j <- data.frame(anios = c(sort(rep(c("2019", "2020", "2021", "2022", "2023"
        y = "Año") +
   theme(panel.background = element_blank(),
         panel.grid = element_blank(),
-        panel.border = element_rect(colour = "black", fill = NA))
+        panel.border = element_rect(colour = "black", fill = NA), 
+        legend.position = "bottom")
 
 ## Número de casos por año y mes Costa
 
@@ -241,7 +255,8 @@ img05j <- data.frame(anios = c(sort(rep(c("2019", "2020", "2021", "2022", "2023"
        y = "Año") +
   theme(panel.background = element_blank(),
         panel.grid = element_blank(),
-        panel.border = element_rect(colour = "black", fill = NA))
+        panel.border = element_rect(colour = "black", fill = NA), 
+        legend.position = "bottom")
 
 ## Número de casos por año y mes resuelta
 
@@ -266,7 +281,8 @@ img06j <- data.frame(anios = c(sort(rep(c("2019", "2020", "2021", "2022", "2023"
        y = "Año") +
   theme(panel.background = element_blank(),
         panel.grid = element_blank(),
-        panel.border = element_rect(colour = "black", fill = NA))
+        panel.border = element_rect(colour = "black", fill = NA), 
+        legend.position = "bottom")
 
 ## Número de casos por año y mes ejecutoria
 
@@ -291,16 +307,18 @@ img07j <- data.frame(anios = c(sort(rep(c("2019", "2020", "2021", "2022", "2023"
        y = "Año") +
   theme(panel.background = element_blank(),
         panel.grid = element_blank(),
-        panel.border = element_rect(colour = "black", fill = NA))
+        panel.border = element_rect(colour = "black", fill = NA), 
+        legend.position = "bottom")
 
 export(list("tabla01f" = tabla01f, "tabla02f" = tabla02f, 
-            "tabla01j" = tabla01j, "tabla02j" = tabla02j), 
+            "tabla01j" = tabla01j, "tabla02j" = tabla02j,
+            "tabla03j" = tabla03j), 
        "55_Entregable tabulados/intermedios/02_judicatura_fiscalia_tablas.xlsx")
 
 #####
 # Guardado mapas
 a = 150*1.10
-h = 50*1.20
+h = 80*1.20
 
 ggsave(plot = img01j,
        file ="img01j.png",
@@ -323,7 +341,7 @@ ggsave(plot = img01f,
 # Guardado raster judicatura
 
 a = 150*1.10
-h = 60*1.20
+h = 100*1.20
 
 ggsave(plot = img02j,
        file ="img02j.png",
@@ -379,7 +397,7 @@ ggsave(plot = img07j,
 # Guardado raster fiscalia
 
 a = 150*1.10
-h = 60*1.20
+h = 100*1.20
 
 ggsave(plot = img02f,
        file ="img02f.png",
