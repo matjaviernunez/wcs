@@ -34,7 +34,15 @@ fiscalia <- import("02_Bases de Datos 2025/Fiscalía/Informe_estadistico_2025012
                                 d_PROVINCIA_INCIDENTE == "TUNGURAHUA" ~ "18",
                                 d_PROVINCIA_INCIDENTE == "CANAR" ~ "03",
                                 d_PROVINCIA_INCIDENTE == "ZAMORA CHINCHIPE" ~ "19",
-                                T ~ "99"))
+                                T ~ "99"),
+         rnatura = case_when(DPA_PROVIN %in% c("01", "02", "03", "04", "05", 
+                                               "06", "10", "11", "17", "18") ~ "Sierra",
+                             DPA_PROVIN %in% c("07", "08", "09", "12", "13", 
+                                               "20", "23", "24") ~ "Costa",
+                             DPA_PROVIN %in% c("14", "15", "16", "19", "21", 
+                                               "22") ~ "Amazonía",
+                             T ~ "Niidea")
+         )
   
 
 #####
@@ -44,10 +52,12 @@ judicatura_ci <- import("02_Bases de Datos 2025/Judicatura/CJ 0936 Causas Art 24
                       sheet = "Causas Ingresadas", range = "B6:H250")
 
 judicatura_cr <- import("02_Bases de Datos 2025/Judicatura/CJ 0936 Causas Art 247 corte agosto 2024(1).xlsx",
-                        sheet = "Causas Resueltas", range = "B6:J202")
+                        sheet = "Causas Resueltas", range = "B6:J202") |> 
+  mutate(causas_resueltas = 1)
 
 judicatura_cre <- import("02_Bases de Datos 2025/Judicatura/CJ 0936 Causas Art 247 corte agosto 2024(1).xlsx",
-                        sheet = "Causas Razón de ejecutoría", range = "B6:I114")
+                        sheet = "Causas Razón de ejecutoría", range = "B6:I114") |> 
+  mutate(causas_ejecutoria = 1)
 judicatura <- judicatura_ci |> 
   left_join(judicatura_cr |> 
               select(- `ESTADO CAUSA`, - `DELITO/ACCIÓN`),
@@ -55,8 +65,8 @@ judicatura <- judicatura_ci |>
   left_join(judicatura_cre |> 
               select(- `ESTADO CAUSA`, - `DELITO/ACCIÓN`),
             by = c("IDJUICIO", "PROVINCIA", "CANTON", "INSTANCIA")) |> 
-  mutate(causas_resueltas = ifelse(IDJUICIO %in% judicatura_cr$IDJUICIO, 1, 0),
-         causas_ejecutoria = ifelse(IDJUICIO %in% judicatura_cre$IDJUICIO, 1, 0),
+  mutate(causas_resueltas = ifelse(is.na(causas_resueltas), 0, causas_resueltas),
+         causas_ejecutoria = ifelse(is.na(causas_ejecutoria), 0, causas_ejecutoria),
          DPA_PROVIN = case_when(PROVINCIA == "GUAYAS" ~ "09",
                                 PROVINCIA == "TUNGURAHUA" ~ "18",
                                 PROVINCIA == "GALAPAGOS" ~ "20",                     
@@ -77,7 +87,14 @@ judicatura <- judicatura_ci |>
                                 PROVINCIA == "AZUAY" ~ "01",                         
                                 PROVINCIA == "PASTAZA" ~ "16",
                                 PROVINCIA == "SANTO DOMINGO DE LOS TSACHILAS" ~ "23",
-                                T ~ "99"))
+                                T ~ "99"),
+         rnatura = case_when(DPA_PROVIN %in% c("01", "02", "03", "04", "05", 
+                                               "06", "10", "11", "17", "18") ~ "Sierra",
+                             DPA_PROVIN %in% c("07", "08", "09", "12", "13", 
+                                               "20", "23", "24") ~ "Costa",
+                             DPA_PROVIN %in% c("14", "15", "16", "19", "21", 
+                                               "22") ~ "Amazonía",
+                             T ~ "Niidea"))
 
 rm(judicatura_ci, judicatura_cr, judicatura_cre)
 
@@ -94,6 +111,9 @@ render(input="55_Entregable tabulados/rutinas/02_2_fiscalia_judicatura_rmarkdown
        output_dir = "55_Entregable tabulados/productos/",
        output_file = "informe_02_fiscalia_judicatura.html",
        knit_root_dir = getwd())
+
+save(fiscalia, judicatura, provincias,
+     file = "55_Entregable tabulados/intermedios/02_fiscalia_judicatura.RData")
 
 # render(input="55_Entregable tabulados/rutinas/02_2_fiscalia_judicatura_rmarkdown.Rmd",
 #        output_format="pdf_document", 
