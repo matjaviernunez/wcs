@@ -1,7 +1,7 @@
 sobre los diccionarios
 - nombre actual - nombre propuesto
 - variables a observar (rojo columna A): porque en notas adicionales
-- variables a aumentar (siempre al final en verde columna A): porque en notas adicionales
+- variables a aumentar (siempre al final en verde columna A): porque en observaciones
 
 
 Metodología (seccion 2)
