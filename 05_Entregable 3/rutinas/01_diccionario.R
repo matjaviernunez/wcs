@@ -63,7 +63,7 @@ for(i in 1:length(archivos)){
     for(k in 1:length(pp)){
       
       # añadir hoja
-      addWorksheet(wb, substr(paste(pp[k], nh, sep = "_"), 1, 30))
+      addWorksheet(wb, substr(paste(npp[k], nh, sep = "_"), 1, 30))
       
       hh <- bvc %>% 
         group_by(.data[[pp[k]]]) %>% 
