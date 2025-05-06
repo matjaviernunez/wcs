@@ -1,0 +1,20 @@
+INTRODUCCIÓN
+Dar una visión general de la consultoría de la que somos parte.
+Explicar los procesos que se van a llevar a cabo.
+Fijar que base de datos tomamos como ejemplo
+CONSTRUCCIÓN DEL DICCIONARIO DE VARIABLES
+Normas simples de una base de datos:
+- Una fila con los nombres de las variables
+	- Pantallasos de espacios en blanco
+- Nombres de variables únicos
+	- Pantallaso nombres y apellidos repetidos
+- Consistencia de las variables
+	- Identificadores de acta
+	- Fechas
+	- Numero de individuos
+	- etapa de vida y estado fisico
+BREVE ANALISIS DE LA INFORMACION
+- Determinar las 5 especies que por clase más traficadas
+
+
+CHARAPA HUEVOS
