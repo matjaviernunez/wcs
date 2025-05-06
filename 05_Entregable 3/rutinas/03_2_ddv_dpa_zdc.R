@@ -3,7 +3,7 @@ rm(list = ls())
 library(tidyverse)
 library(openxlsx)
 
-bdd <- read.xlsx("05_Entregable 3/previo/apoyo dpa/TABLA CIRCUITOS,SUBCIRCUITOS.xlsx",
+bdd <- read.xlsx("05_Entregable 3/previo/Dominio de Valores/apoyo dpa/TABLA CIRCUITOS,SUBCIRCUITOS.xlsx",
                  sheet = "POR PROVINCIA", fillMergedCells = T)
 
 bdd_01 <- bdd |> 
@@ -21,7 +21,7 @@ bdd_01 <- bdd |>
          cod_circuito = cod..circuito, ncircuito = nombre.circuito,
          cod_subcircuito = cod..subcircuito, nsubcircuito = nombre.subcircuito)
 
-load("05_Entregable 3/previo/apoyo dpa/dpa_2022.RData")
+load("05_Entregable 3/previo/Dominio de Valores/apoyo dpa/dpa_2022.RData")
 
 parroquia_01 <- parroquia |>
   ungroup() |> 
@@ -82,4 +82,4 @@ writeData(wb, "distritos", distrito)
 writeData(wb, "circuitos", circuito)
 writeData(wb, "subcircuitos", subcircuito)
 
-saveWorkbook(wb, "05_Entregable 3/previo/apoyo dpa/division_geografica.xlsx", overwrite = T)
+saveWorkbook(wb, "05_Entregable 3/previo/Dominio de Valores/apoyo dpa/division_geografica.xlsx", overwrite = T)
