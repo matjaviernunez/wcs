@@ -28,12 +28,17 @@ for(i in 1:length(archivos)){
   dicc <- hojas[substr(hojas, 6, 6) == "d"]
   general <- hojas[substr(hojas, 6, 6) == "g"]
   
+  # crear el nuevo libro
+  wb <- createWorkbook()
+  
   for(j in 1:length(dicc)){
     
-    vat <- import(archivos[i], sheet = dicc[j]) %>% 
+    vn <- import(archivos[i], sheet = dicc[j]) %>% 
       filter(`Formato de Datos` == "Categórica") %>% 
-      select(nom_act = `Nombre actual`)
-    vat <- vat[,1]
+      select(nom_act = `Nombre actual`,
+             nom_pro = `Nombre propuesto`)
+    vat <- vn[,1]
+    vpr <- vn[,2]
     
     #nombre de la hoja a leer
     nh <- import(archivos[i], sheet = general[j])[[2, 2]]
@@ -52,11 +57,8 @@ for(i in 1:length(archivos)){
         select(any_of(vat))
     }
     
-    
     pp <- vat[vat %in% names(bvc)]
-    
-    # crear el nuevo libro
-    wb <- createWorkbook()
+    npp <- vpr[vat %in% names(bvc)]
     
     for(k in 1:length(pp)){
       
@@ -69,7 +71,7 @@ for(i in 1:length(archivos)){
                   `Descripción` = NA)
       
       # guardar datos en la hoja
-      writeData(wb, sheet = substr(paste(pp[k], nh, sep = "_"), 1, 30)
+      writeData(wb, sheet = substr(paste(npp[k], nh, sep = "_"), 1, 30)
                 , x = hh)
       
     }
