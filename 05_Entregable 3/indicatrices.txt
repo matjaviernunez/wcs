@@ -1,0 +1,21 @@
+sobre los diccionarios
+- nombre actual - nombre propuesto
+- variables a observar (rojo columna A): porque en notas adicionales
+- variables a aumentar (siempre al final en verde columna A): porque en observaciones
+
+
+Metodología (seccion 2)
+explicar porque se elimina unidad de medida (junta con descripcion)
+código de colores en diccionarios propuestos
+
+JANS: corregir los nombres de las hojas en el excel
+
+seccion por instituticion y subseccion por base
+aumentar a los metadatos la descripcion (registros, columnas)
+
+observaciones y casos particulares encontrados:
+capturas de las inconsistencias y explicar por que son inconsistencias
+
+recomendaciones
+variables a aumentar, variables a quitar, bases a nivel de registro (evento) o de individuo 
+
