@@ -6,6 +6,12 @@ library(janitor)
 
 cites <- readRDS("55_Entregable tabulados/intermedios/03_cites.rds")
 
+npais <- import("05_Entregable 3/envio/Dominio de Valores/CITES/codigos_cites.xlsx",
+                sheet = "pais")
+
+unidades <- import("05_Entregable 3/envio/Dominio de Valores/CITES/codigos_cites.xlsx",
+                sheet = "unidades")
+
 # tabla número de registros versus numero de id unico
 
 tabla01 <- cites |> 
@@ -62,14 +68,26 @@ tabla02 <- cites |>
   mutate(cantidad = as.numeric(cantidad)) |> 
   group_by(cod_pais_imp, anio) |> 
   summarise(cantidad = sum(cantidad, na.rm = T)) |> 
-  pivot_wider(names_from = anio, values_from = cantidad, values_fill = 0)
+  left_join(npais, by = c("cod_pais_imp" = "cod_pais")) |> 
+  arrange(anio) |> 
+  pivot_wider(names_from = anio, values_from = cantidad, values_fill = 0) |> 
+  mutate(pais = ifelse(is.na(pais), "--", pais)) |> 
+  adorn_totals("col") |> 
+  arrange(desc(Total)) |> 
+  adorn_totals()
 
 tabla021 <- cites |> 
   filter(tipo == "Vivo") |> 
   mutate(cantidad = as.numeric(cantidad)) |> 
   group_by(cod_pais_imp, anio) |> 
   summarise(permisos = n_distinct(cod_permiso)) |> 
-  pivot_wider(names_from = anio, values_from = permisos, values_fill = 0)
+  left_join(npais, by = c("cod_pais_imp" = "cod_pais")) |> 
+  arrange(anio) |> 
+  pivot_wider(names_from = anio, values_from = permisos, values_fill = 0) |> 
+  mutate(pais = ifelse(is.na(pais), "--", pais)) |> 
+  adorn_totals("col") |> 
+  arrange(desc(Total)) |> 
+  adorn_totals()
 
 # cantidad de no vivos por unidades y tipo
 
@@ -78,8 +96,11 @@ tabla03 <- cites |>
   mutate(cantidad = as.numeric(cantidad)) |> 
   group_by(tipo, unidades) |> 
   summarise(cantidad = sum(cantidad, na.rm = T)) |> 
-  pivot_wider(names_from = tipo, values_from = cantidad, values_fill = 0)
+  pivot_wider(names_from = tipo, values_from = cantidad, values_fill = 0) |> 
+  rename(cod_unidades = unidades) |> 
+  left_join(unidades, by = "cod_unidades") |> 
+  select(5, 1:4)
 
-export(list("tabla01" = tabla01, "tabla02" = tabla02, 
-            "tabla021" = tabla021, "tabla03" = tabla03), 
+export(list("registros_permisos_año" = tabla01, "cantidad_vivos_exportados" = tabla02, 
+            "permisos_vivos_exportados" = tabla021, "cantidad_sin_vida_exportados" = tabla03), 
        "55_Entregable tabulados/intermedios/03_cites_tablas.xlsx")
