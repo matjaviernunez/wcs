@@ -16,10 +16,10 @@ rutas <- gsub("-/", "", rutas)
 
 rm(bdds)
 
-archivos <- list.files("05_Entregable 3/maate_extra/", full.names = T)
-archivos <- archivos[substr(archivos, 32, 33) %in% index]
+archivos <- list.files("05_Entregable 3/maate_extra/insumos/", full.names = T)
+archivos <- archivos[substr(archivos, 40, 41) %in% index]
 
-nbdd <- gsub("05_Entregable 3/maate_extra/MD", "", archivos)
+nbdd <- gsub("05_Entregable 3/maate_extra/insumos/MD", "", archivos)
 
 for(i in 1:length(archivos)){
   
@@ -66,7 +66,7 @@ for(i in 1:length(archivos)){
     
   }
   # Guardar el archivo
-  saveWorkbook(wb, file = paste0("05_Entregable 3/maate_extra/DdV", nbdd[i]),
+  saveWorkbook(wb, file = paste0("05_Entregable 3/maate_extra/intermedios/DdV", nbdd[i]),
                overwrite = TRUE)
   
   rm(wb)
