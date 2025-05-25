@@ -39,5 +39,6 @@ table(rescate$institucion_rescatista, useNA = "ifany")
 
 rm(lf, i, nl, nombres, nor)
 
+export(rescate, "05_Entregable 3/maate_extra/intermedios/Rescates_9mayo2025_v2.0.xlsx")
 
 
