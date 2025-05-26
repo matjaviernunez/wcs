@@ -99,6 +99,6 @@ rescate2 <- rescate %>%
   select(-apoyo, -rno, -nnn)
 
 
-export(rescate, "05_Entregable 3/maate_extra/intermedios/Rescates_9mayo2025_v2.0.xlsx")
+export(rescate2, "05_Entregable 3/maate_extra/intermedios/Rescates_9mayo2025_v2.0.xlsx")
 
 
