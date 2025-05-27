@@ -40,7 +40,9 @@ retencion <- retencion %>%
   select(any_of(nor)) |> 
   mutate(cantidad = case_when(cantidad == 0 & is.na(nro_total) ~ 1,
                               is.na(cantidad) & is.na(nro_total) ~ 1,
-                              T ~ cantidad))
+                              T ~ cantidad),
+         fecha_retencion = as.Date(fecha_retencion),
+         fecha_destino = as.Date(fecha_destino))
 
 table(retencion$clase)
 table(retencion$nombre_cientifico)
