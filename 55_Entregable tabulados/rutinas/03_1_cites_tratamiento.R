@@ -130,5 +130,13 @@ aux22_23 <- cites22_23 |>
 
 cites <- rbind(aux22_23, aux24)
 
+# especie 
+apoyo_especie <- cites %>% 
+  group_by(especie) %>% 
+  summarise()
+
+export(apoyo_especie, "55_Entregable tabulados/intermedios/03_apoyo_cites_especie.xlsx")
+
+
 saveRDS(cites, "55_Entregable tabulados/intermedios/03_cites.rds")
 export(cites, "55_Entregable tabulados/intermedios/03_cites.xlsx")
