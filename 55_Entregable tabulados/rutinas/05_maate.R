@@ -278,7 +278,8 @@ g13 <- t13 %>%
            position = position_dodge()) +
   coord_flip() +
   theme_light() +
-  theme(axis.text.x = element_text(angle = 30, hjust = 1, size = 7))
+  theme(axis.text.x = element_text(angle = 30, hjust = 1, size = 7),
+        legend.position = "none")
 
 g13
 
@@ -344,7 +345,7 @@ g15
 
 t23_a <- r1 %>%
   filter(reino == "Animal") %>% 
-  group_by(reino, clase, causal_coid_coda) %>% 
+  group_by(clase, causal_coid_coda) %>% 
   summarise(n = n()) %>% 
   ungroup() %>% 
   pivot_wider(names_from = causal_coid_coda, values_from = n) %>% 
@@ -353,7 +354,7 @@ t23_a <- r1 %>%
 
 g23_a <- r1 %>%
   filter(reino == "Animal") %>% 
-  group_by(reino, clase, causal_coid_coda) %>% 
+  group_by(clase, causal_coid_coda) %>% 
   summarise(n = n()) %>% 
   ungroup() %>% 
   mutate(clase = factor(clase,
@@ -369,7 +370,7 @@ g23_a
 
 t23_p <- r1 %>%
   filter(reino == "Plantae") %>% 
-  group_by(reino, clase, causal_coid_coda) %>% 
+  group_by(clase, causal_coid_coda) %>% 
   summarise(n = n()) %>% 
   ungroup() %>% 
   pivot_wider(names_from = causal_coid_coda, values_from = n) %>% 
@@ -378,7 +379,7 @@ t23_p <- r1 %>%
 
 g23_p <- r1 %>%
   filter(reino == "Plantae") %>% 
-  group_by(reino, clase, causal_coid_coda) %>% 
+  group_by(clase, causal_coid_coda) %>% 
   summarise(n = n()) %>% 
   ungroup() %>% 
   mutate(clase = factor(clase,
@@ -396,7 +397,7 @@ g23_p
 
 t24_a <- r1 %>% 
   filter(reino == "Animal") %>% 
-  group_by(reino, clase, estado_fisico) %>% 
+  group_by(clase, estado_fisico) %>% 
   summarise(n = n()) %>% 
   ungroup() %>% 
   pivot_wider(names_from = estado_fisico, values_from = n) %>% 
@@ -405,7 +406,7 @@ t24_a <- r1 %>%
 
 g24_a <- r1 %>%
   filter(reino == "Animal") %>% 
-  group_by(reino, clase, estado_fisico) %>% 
+  group_by(clase, estado_fisico) %>% 
   summarise(n = n()) %>% 
   ungroup() %>% 
   mutate(clase = factor(clase,
@@ -421,7 +422,7 @@ g24_a
 
 t24_p <- r1 %>% 
   filter(reino == "Plantae") %>% 
-  group_by(reino, clase, estado_fisico) %>% 
+  group_by(clase, estado_fisico) %>% 
   summarise(n = n()) %>% 
   ungroup() %>% 
   pivot_wider(names_from = estado_fisico, values_from = n) %>% 
@@ -430,7 +431,7 @@ t24_p <- r1 %>%
 
 g24_p <- r1 %>%
   filter(reino == "Plantae") %>% 
-  group_by(reino, clase, estado_fisico) %>% 
+  group_by(clase, estado_fisico) %>% 
   summarise(n = n()) %>% 
   ungroup() %>% 
   mutate(clase = factor(clase,
@@ -448,7 +449,7 @@ g24_p
 
 t25_a <- r1 %>%
   filter(reino == "Animal") %>% 
-  group_by(reino, clase, destino_final) %>% 
+  group_by(clase, destino_final) %>% 
   summarise(n = n()) %>% 
   ungroup() %>% 
   pivot_wider(names_from = destino_final, values_from = n) %>% 
@@ -457,7 +458,7 @@ t25_a <- r1 %>%
   
 g25_a <- r1 %>%
   filter(reino == "Animal") %>% 
-  group_by(reino, clase, destino_final) %>% 
+  group_by(clase, destino_final) %>% 
   summarise(n = n()) %>% 
   ungroup() %>% 
   mutate(clase = factor(clase,
@@ -473,7 +474,7 @@ g25_a
 
 t25_p <- r1 %>%
   filter(reino == "Plantae") %>% 
-  group_by(reino, clase, destino_final) %>% 
+  group_by(clase, destino_final) %>% 
   summarise(n = n()) %>% 
   ungroup() %>% 
   pivot_wider(names_from = destino_final, values_from = n) %>% 
@@ -482,7 +483,7 @@ t25_p <- r1 %>%
 
 g25_p <- r1 %>%
   filter(reino == "Plantae") %>% 
-  group_by(reino, clase, destino_final) %>% 
+  group_by(clase, destino_final) %>% 
   summarise(n = n()) %>% 
   ungroup() %>% 
   mutate(clase = factor(clase,
