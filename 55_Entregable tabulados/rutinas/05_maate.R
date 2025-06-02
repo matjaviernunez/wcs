@@ -42,16 +42,48 @@ rm(apoyo, respuesta, retenciones)
 t01 <- r1 %>% 
   group_by(division, reino, anio_retencion) %>% 
   summarise(n=n()) %>% 
+  ungroup() %>% 
   pivot_wider(names_from = anio_retencion, values_from = n) %>% 
   replace(is.na(.), 0)
+
+p01 <- r1 %>% 
+  group_by(division, reino, anio_retencion) %>% 
+  summarise(n=n()) %>% 
+  ungroup() %>% 
+  filter(anio_retencion != "no_declarado") %>% 
+  ggplot() + 
+  geom_line(aes(anio_retencion, n, color = reino, group = reino),
+            linewidth = 1.5) +
+  theme_light()
+
+p01  
 
 #### T02.- Provincias total por año MAATE RETENCIONES VS UPMA ####
 
 t02 <- r1 %>% 
   group_by(provincia, anio_retencion) %>% 
   summarise(n=n()) %>% 
+  ungroup() %>% 
   pivot_wider(names_from = anio_retencion, values_from = n) %>% 
   replace(is.na(.), 0)
+
+p02 <- r1 %>% 
+  group_by(provincia, anio_retencion) %>%
+  summarise(n=n()) %>%
+  ungroup() %>%
+  filter(anio_retencion != "no_declarado") %>%
+  mutate(provincia = factor(provincia,
+                            c("17", "24", "13", "09", "15", "07", "21", "05", "16", "14", "04", "11", "18", "22", "08", "10"),
+                            c("17", "24", "13", "09", "15", "07", "21", "05", "16", "14", "04", "11", "18", "22", "08", "10"))) %>% 
+  ggplot() + 
+  geom_col(aes(provincia, n, fill = anio_retencion),
+            linewidth = 1.5,
+           position = position_dodge()) +
+  theme_light()
+
+p02  
+
+order
 
 #### T04.- Mapa nacional con decomisos ¿gradiente de calor? ####
 
@@ -80,6 +112,18 @@ t07 <- r1 %>%
   ungroup() %>% 
   arrange(desc(n))
 
+g07 <- t07 %>% 
+  mutate(clase = factor(clase,
+                            .$clase[order(.$n, decreasing = T)],
+                            .$clase[order(.$n, decreasing = T)])) %>% 
+  ggplot() + 
+  geom_col(aes(clase, n, fill = clase),
+           linewidth = 1.5,
+           position = position_dodge()) +
+  theme_light()
+
+g07  
+
 #### T08.- sp mayormente decomisadas para aves, reptiles, mamíferos…. ####  
 
 t08 <- r1 %>% 
@@ -97,6 +141,19 @@ t08 <- r1 %>%
   filter(nr <= 5) %>% 
   select(-nr)
 
+g08 <- t08 %>% 
+  mutate(nombre_cientifico = factor(nombre_cientifico,
+                        .$nombre_cientifico[order(.$n, decreasing = T)],
+                        .$nombre_cientifico[order(.$n, decreasing = T)])) %>% 
+  ggplot() + 
+  geom_col(aes(nombre_cientifico, n, fill = clase),
+           linewidth = 1.5,
+           position = position_dodge()) +
+  facet_wrap(~ clase, scales = "free_x") +
+  theme_light() +
+  theme(axis.text.x = element_text(angle = 30, hjust = 1, size = 7))
+
+g08
 
 #### T13.- Cantidad de elementos constitutivos por tipo (huevos, huesos, etc ####  
 
@@ -114,6 +171,20 @@ t13 <- r1 %>%
   ungroup() %>% 
   arrange(desc(n))
 
+g13 <- t13 %>% 
+  mutate(elemento_constitutivo = factor(elemento_constitutivo,
+                                    .$elemento_constitutivo[order(.$n, decreasing = F)],
+                                    .$elemento_constitutivo[order(.$n, decreasing = F)])) %>% 
+  ggplot() + 
+  geom_col(aes(elemento_constitutivo, n, fill = elemento_constitutivo),
+           linewidth = 1.5,
+           position = position_dodge()) +
+  coord_flip() +
+  theme_light() +
+  theme(axis.text.x = element_text(angle = 30, hjust = 1, size = 7))
+
+g13
+
 #### T14.- Cantidad de elementos constitutivos por tipo (huevos, huesos, etc) por provincia apilado ####
 
 t14 <- r1 %>% 
@@ -130,6 +201,19 @@ t14 <- r1 %>%
   ungroup() %>% 
   arrange(provincia, desc(n))
 
+g14 <- t14 %>% 
+  mutate(elemento_constitutivo = factor(elemento_constitutivo,
+                                        t13$elemento_constitutivo[order(t13$n, decreasing = F)],
+                                        t13$elemento_constitutivo[order(t13$n, decreasing = F)])) %>% 
+  ggplot() + 
+  geom_col(aes(elemento_constitutivo, n, fill = provincia, group = provincia),
+           linewidth = 1.5) +
+  coord_flip() +
+  theme_light() +
+  theme(axis.text.x = element_text(angle = 30, hjust = 1, size = 7))
+
+g14
+
 #### T15.- Cantidad de elementos constitutivos por tipo (huevos, huesos, etc) por taxones ####
 
 t15 <- r1 %>% 
@@ -145,6 +229,20 @@ t15 <- r1 %>%
   summarise(n = sum(cantidad)) %>% 
   ungroup() %>% 
   arrange(clase, desc(n))
+
+g15 <- t15 %>% 
+  mutate(elemento_constitutivo = factor(elemento_constitutivo,
+                                        .$elemento_constitutivo[order(.$n, decreasing = F)],
+                                        .$elemento_constitutivo[order(.$n, decreasing = F)])) %>% 
+  ggplot() + 
+  geom_col(aes(elemento_constitutivo, n, fill = clase),
+           linewidth = 1.5,
+           position = position_dodge()) +
+  facet_wrap(~ clase, scales = "free_x") +
+  theme_light() +
+  theme(axis.text.x = element_text(angle = 30, hjust = 1, size = 7))
+
+g15
 
 #### T23.- causal coip por taxon ####
 
