@@ -4,6 +4,8 @@ rm(list = ls())
 library(rio)
 library(sf)
 library(lubridate)
+library(forcats)
+library(tidytext)
 library(tidyverse)
 #
 provincias <- read_sf("55_Entregable tabulados/insumos/provincias.gpkg") %>% 
@@ -46,7 +48,7 @@ t01 <- r1 %>%
   pivot_wider(names_from = anio_retencion, values_from = n) %>% 
   replace(is.na(.), 0)
 
-p01 <- r1 %>% 
+g01 <- r1 %>% 
   group_by(division, reino, anio_retencion) %>% 
   summarise(n=n()) %>% 
   ungroup() %>% 
@@ -56,18 +58,20 @@ p01 <- r1 %>%
             linewidth = 1.5) +
   theme_light()
 
-p01  
+g01  
 
 #### T02.- Provincias total por año MAATE RETENCIONES VS UPMA ####
 
-t02 <- r1 %>% 
+t02_a <- r1 %>% 
+  filter(reino == "Animal") %>% 
   group_by(provincia, anio_retencion) %>% 
   summarise(n=n()) %>% 
   ungroup() %>% 
   pivot_wider(names_from = anio_retencion, values_from = n) %>% 
   replace(is.na(.), 0)
 
-p02 <- r1 %>% 
+g02_a <- r1 %>% 
+  filter(reino == "Animal") %>% 
   group_by(provincia, anio_retencion) %>%
   summarise(n=n()) %>%
   ungroup() %>%
@@ -81,25 +85,64 @@ p02 <- r1 %>%
            position = position_dodge()) +
   theme_light()
 
-p02  
+g02_a
 
-order
+t02_p <- r1 %>% 
+  filter(reino == "Plantae") %>% 
+  group_by(provincia, anio_retencion) %>% 
+  summarise(n=n()) %>% 
+  ungroup() %>% 
+  pivot_wider(names_from = anio_retencion, values_from = n) %>% 
+  replace(is.na(.), 0)
+
+g02_p <- r1 %>% 
+  filter(reino == "Plantae") %>% 
+  group_by(provincia, anio_retencion) %>%
+  summarise(n=n()) %>%
+  ungroup() %>%
+  filter(anio_retencion != "no_declarado") %>%
+  mutate(provincia = factor(provincia,
+                            c("17", "24", "13", "09", "15", "07", "21", "05", "16", "14", "04", "11", "18", "22", "08", "10"),
+                            c("17", "24", "13", "09", "15", "07", "21", "05", "16", "14", "04", "11", "18", "22", "08", "10"))) %>% 
+  ggplot() + 
+  geom_col(aes(provincia, n, fill = anio_retencion),
+           linewidth = 1.5,
+           position = position_dodge()) +
+  theme_light()
+
+g02_p
 
 #### T04.- Mapa nacional con decomisos ¿gradiente de calor? ####
 
-t04 <- r1 %>% 
+t04_a <- r1 %>% 
+  filter(reino == "Animal") %>% 
   group_by(provincia) %>% 
   summarise(n = n()) %>% 
   ungroup() %>% 
   arrange(desc(n))
 
-g04 <- provincias %>% 
-  left_join(t04, by = "provincia") %>% 
+g04_a <- provincias %>%
+  left_join(t04_a, by = "provincia") %>% 
   ggplot()+
   geom_sf(aes(fill = n)) +
   scale_fill_distiller(trans = "reverse")
 
-g04
+g04_a
+
+t04_p <- r1 %>% 
+  filter(reino == "Plantae") %>% 
+  group_by(provincia) %>% 
+  summarise(n = n()) %>% 
+  ungroup() %>% 
+  arrange(desc(n))
+
+g04_p <- provincias %>% 
+  left_join(t04_p, by = "provincia") %>% 
+  ggplot()+
+  geom_sf(aes(fill = n)) +
+  scale_fill_distiller(trans = "reverse")
+
+g04_p
 
 #### T07.- Número de especímenes vivos decomisados por grupo taxonómico misma tendencia? ####
 
@@ -143,14 +186,15 @@ t08 <- r1 %>%
 
 g08 <- t08 %>% 
   mutate(nombre_cientifico = factor(nombre_cientifico,
-                        .$nombre_cientifico[order(.$n, decreasing = T)],
-                        .$nombre_cientifico[order(.$n, decreasing = T)])) %>% 
+                        .$nombre_cientifico[order(.$n, decreasing = F)],
+                        .$nombre_cientifico[order(.$n, decreasing = F)])) %>% 
   ggplot() + 
   geom_col(aes(nombre_cientifico, n, fill = clase),
            linewidth = 1.5,
            position = position_dodge()) +
-  facet_wrap(~ clase, scales = "free_x") +
+  facet_wrap(~ clase, scales = "free_y") +
   theme_light() +
+  coord_flip() +  
   theme(axis.text.x = element_text(angle = 30, hjust = 1, size = 7))
 
 g08
@@ -230,46 +274,171 @@ t15 <- r1 %>%
   ungroup() %>% 
   arrange(clase, desc(n))
 
-g15 <- t15 %>% 
-  mutate(elemento_constitutivo = factor(elemento_constitutivo,
-                                        .$elemento_constitutivo[order(.$n, decreasing = F)],
-                                        .$elemento_constitutivo[order(.$n, decreasing = F)])) %>% 
+g15 <- t15 %>%
+  mutate(ele_cons_ordenado = reorder_within(elemento_constitutivo, n, clase)) %>% 
   ggplot() + 
-  geom_col(aes(elemento_constitutivo, n, fill = clase),
+  geom_col(aes(ele_cons_ordenado, n, fill = clase),
            linewidth = 1.5,
            position = position_dodge()) +
-  facet_wrap(~ clase, scales = "free_x") +
+  facet_wrap(~ clase, scales = "free_y") +
+  coord_flip() +
   theme_light() +
-  theme(axis.text.x = element_text(angle = 30, hjust = 1, size = 7))
+  scale_x_reordered(labels = function(x) gsub("__.+$", "", x))
 
 g15
 
 #### T23.- causal coip por taxon ####
 
-t23 <- r1 %>% 
-  group_by(clase, causal_coid_coda) %>% 
+t23_a <- r1 %>%
+  filter(reino == "Animal") %>% 
+  group_by(reino, clase, causal_coid_coda) %>% 
   summarise(n = n()) %>% 
   ungroup() %>% 
   pivot_wider(names_from = causal_coid_coda, values_from = n) %>% 
-  replace(is.na(.), 0)
+  replace(is.na(.), 0) %>% 
+  cbind(total = rowSums(.[,3:9]))
+
+g23_a <- r1 %>%
+  filter(reino == "Animal") %>% 
+  group_by(reino, clase, causal_coid_coda) %>% 
+  summarise(n = n()) %>% 
+  ungroup() %>% 
+  mutate(clase = factor(clase,
+                        t23_a$clase[order(t23_a$total, decreasing = F)],
+                        t23_a$clase[order(t23_a$total, decreasing = F)])) %>% 
+  ggplot() + 
+  geom_col(aes(clase, n, fill = causal_coid_coda, group = causal_coid_coda),
+           linewidth = 1.5) +
+  coord_flip() +
+  theme_light()
+
+g23_a
+
+t23_p <- r1 %>%
+  filter(reino == "Plantae") %>% 
+  group_by(reino, clase, causal_coid_coda) %>% 
+  summarise(n = n()) %>% 
+  ungroup() %>% 
+  pivot_wider(names_from = causal_coid_coda, values_from = n) %>% 
+  replace(is.na(.), 0) %>% 
+  cbind(total = rowSums(.[,3:7]))
+
+g23_p <- r1 %>%
+  filter(reino == "Plantae") %>% 
+  group_by(reino, clase, causal_coid_coda) %>% 
+  summarise(n = n()) %>% 
+  ungroup() %>% 
+  mutate(clase = factor(clase,
+                        t23_p$clase[order(t23_p$total, decreasing = F)],
+                        t23_p$clase[order(t23_p$total, decreasing = F)])) %>% 
+  ggplot() + 
+  geom_col(aes(clase, n, fill = causal_coid_coda, group = causal_coid_coda),
+           linewidth = 1.5) +
+  coord_flip() +
+  theme_light()
+
+g23_p
 
 #### T24.- estado fisico por taxon ####
 
-t24 <- r1 %>% 
-  group_by(clase, estado_fisico) %>% 
+t24_a <- r1 %>% 
+  filter(reino == "Animal") %>% 
+  group_by(reino, clase, estado_fisico) %>% 
   summarise(n = n()) %>% 
   ungroup() %>% 
   pivot_wider(names_from = estado_fisico, values_from = n) %>% 
-  replace(is.na(.), 0)
+  replace(is.na(.), 0) %>% 
+  cbind(total = rowSums(.[,3:5]))
+
+g24_a <- r1 %>%
+  filter(reino == "Animal") %>% 
+  group_by(reino, clase, estado_fisico) %>% 
+  summarise(n = n()) %>% 
+  ungroup() %>% 
+  mutate(clase = factor(clase,
+                        t24_a$clase[order(t24_a$total, decreasing = F)],
+                        t24_a$clase[order(t24_a$total, decreasing = F)])) %>% 
+  ggplot() + 
+  geom_col(aes(clase, n, fill = estado_fisico, group = estado_fisico),
+           linewidth = 1.5) +
+  coord_flip() +
+  theme_light()
+
+g24_a
+
+t24_p <- r1 %>% 
+  filter(reino == "Plantae") %>% 
+  group_by(reino, clase, estado_fisico) %>% 
+  summarise(n = n()) %>% 
+  ungroup() %>% 
+  pivot_wider(names_from = estado_fisico, values_from = n) %>% 
+  replace(is.na(.), 0) %>% 
+  cbind(total = rowSums(.[,3:5]))
+
+g24_p <- r1 %>%
+  filter(reino == "Plantae") %>% 
+  group_by(reino, clase, estado_fisico) %>% 
+  summarise(n = n()) %>% 
+  ungroup() %>% 
+  mutate(clase = factor(clase,
+                        t24_p$clase[order(t24_p$total, decreasing = F)],
+                        t24_p$clase[order(t24_p$total, decreasing = F)])) %>% 
+  ggplot() + 
+  geom_col(aes(clase, n, fill = estado_fisico, group = estado_fisico),
+           linewidth = 1.5) +
+  coord_flip() +
+  theme_light()
+
+g24_p
 
 #### T25.- destino final por taxon ####
 
-t25 <- r1 %>% 
-  group_by(clase, destino_final) %>% 
+t25_a <- r1 %>%
+  filter(reino == "Animal") %>% 
+  group_by(reino, clase, destino_final) %>% 
   summarise(n = n()) %>% 
   ungroup() %>% 
   pivot_wider(names_from = destino_final, values_from = n) %>% 
-  replace(is.na(.), 0)
+  replace(is.na(.), 0)%>% 
+  cbind(total = rowSums(.[,3:5]))
   
+g25_a <- r1 %>%
+  filter(reino == "Animal") %>% 
+  group_by(reino, clase, destino_final) %>% 
+  summarise(n = n()) %>% 
+  ungroup() %>% 
+  mutate(clase = factor(clase,
+                        t25_a$clase[order(t25_a$total, decreasing = F)],
+                        t25_a$clase[order(t25_a$total, decreasing = F)])) %>% 
+  ggplot() + 
+  geom_col(aes(clase, n, fill = destino_final, group = destino_final),
+           linewidth = 1.5) +
+  coord_flip() +
+  theme_light()
 
+g25_a
 
+t25_p <- r1 %>%
+  filter(reino == "Plantae") %>% 
+  group_by(reino, clase, destino_final) %>% 
+  summarise(n = n()) %>% 
+  ungroup() %>% 
+  pivot_wider(names_from = destino_final, values_from = n) %>% 
+  replace(is.na(.), 0) %>% 
+  cbind(total = rowSums(.[,3:4]))
+
+g25_p <- r1 %>%
+  filter(reino == "Plantae") %>% 
+  group_by(reino, clase, destino_final) %>% 
+  summarise(n = n()) %>% 
+  ungroup() %>% 
+  mutate(clase = factor(clase,
+                        t25_p$clase[order(t25_p$total, decreasing = F)],
+                        t25_p$clase[order(t25_p$total, decreasing = F)])) %>% 
+  ggplot() + 
+  geom_col(aes(clase, n, fill = destino_final, group = destino_final),
+           linewidth = 1.5) +
+  coord_flip() +
+  theme_light()
+
+g25_p
