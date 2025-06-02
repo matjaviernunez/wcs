@@ -41,14 +41,16 @@ rm(apoyo, respuesta, retenciones)
 
 #### T01.- Número de decomisos (eventos) MAATE RETENCIONES VS UPMA por año ####
 
-t01 <- r1 %>% 
-  group_by(division, reino, anio_retencion) %>% 
+t01_a <- r1 %>% 
+  filter(reino == "Animal") %>% 
+  group_by(reino, anio_retencion) %>% 
   summarise(n=n()) %>% 
   ungroup() %>% 
   pivot_wider(names_from = anio_retencion, values_from = n) %>% 
   replace(is.na(.), 0)
 
-g01 <- r1 %>% 
+g01_a <- r1 %>% 
+  filter(reino == "Animal") %>% 
   group_by(division, reino, anio_retencion) %>% 
   summarise(n=n()) %>% 
   ungroup() %>% 
@@ -58,37 +60,80 @@ g01 <- r1 %>%
             linewidth = 1.5) +
   theme_light()
 
-g01  
+g01_a
+
+t01_p <- r1 %>% 
+  filter(reino == "Plantae") %>% 
+  group_by(division, reino, anio_retencion) %>% 
+  summarise(n=n()) %>% 
+  ungroup() %>% 
+  pivot_wider(names_from = anio_retencion, values_from = n) %>% 
+  replace(is.na(.), 0)
+
+g01_p <- r1 %>% 
+  filter(reino == "Plantae") %>% 
+  group_by(division, reino, anio_retencion) %>% 
+  summarise(n=n()) %>% 
+  ungroup() %>% 
+  filter(anio_retencion != "no_declarado") %>% 
+  ggplot() + 
+  geom_line(aes(anio_retencion, n, color = reino, group = reino),
+            linewidth = 1.5) +
+  theme_light()
+
+g01_p
 
 #### T02.- Provincias total por año MAATE RETENCIONES VS UPMA ####
 
 t02_a <- r1 %>% 
   filter(reino == "Animal") %>% 
-  group_by(provincia, anio_retencion) %>% 
-  summarise(n=n()) %>% 
+  mutate(rnatura = case_when(provincia %in% c("01", "02", "03", "04", "05", 
+                                               "06", "10", "11", "17", "18") ~ "Sierra",
+                             provincia %in% c("07", "08", "09", "12", "13", 
+                                               "20", "23", "24") ~ "Costa",
+                             provincia %in% c("14", "15", "16", "19", "21", 
+                                               "22") ~ "Amazonía",
+                             T ~ "Niidea")) %>% 
+  group_by(rnatura, provincia, anio_retencion) %>% 
+  summarise(n = n()) %>% 
   ungroup() %>% 
   pivot_wider(names_from = anio_retencion, values_from = n) %>% 
   replace(is.na(.), 0)
 
 g02_a <- r1 %>% 
   filter(reino == "Animal") %>% 
-  group_by(provincia, anio_retencion) %>%
-  summarise(n=n()) %>%
+  mutate(rnatura = case_when(provincia %in% c("01", "02", "03", "04", "05", 
+                                              "06", "10", "11", "17", "18") ~ "Sierra",
+                             provincia %in% c("07", "08", "09", "12", "13", 
+                                              "20", "23", "24") ~ "Costa",
+                             provincia %in% c("14", "15", "16", "19", "21", 
+                                              "22") ~ "Amazonía",
+                             T ~ "Niidea")) %>% 
+  group_by(rnatura, provincia, anio_retencion) %>%
+  summarise(n = n()) %>%
   ungroup() %>%
+  mutate(prov_ordenado = reorder_within(provincia, n, rnatura)) %>% 
   filter(anio_retencion != "no_declarado") %>%
-  mutate(provincia = factor(provincia,
-                            c("17", "24", "13", "09", "15", "07", "21", "05", "16", "14", "04", "11", "18", "22", "08", "10"),
-                            c("17", "24", "13", "09", "15", "07", "21", "05", "16", "14", "04", "11", "18", "22", "08", "10"))) %>% 
   ggplot() + 
-  geom_col(aes(provincia, n, fill = anio_retencion),
-            linewidth = 1.5,
+  geom_col(aes(prov_ordenado, n, fill = anio_retencion),
+           linewidth = 1.5,
            position = position_dodge()) +
-  theme_light()
+  coord_flip() +
+  facet_wrap(~ rnatura, scales = "free_y") + 
+  theme_light() +
+  scale_x_reordered(labels = function(x) gsub("__.+$", "", x))
 
 g02_a
 
 t02_p <- r1 %>% 
   filter(reino == "Plantae") %>% 
+  mutate(rnatura = case_when(provincia %in% c("01", "02", "03", "04", "05", 
+                                              "06", "10", "11", "17", "18") ~ "Sierra",
+                             provincia %in% c("07", "08", "09", "12", "13", 
+                                              "20", "23", "24") ~ "Costa",
+                             provincia %in% c("14", "15", "16", "19", "21", 
+                                              "22") ~ "Amazonía",
+                             T ~ "Niidea")) %>% 
   group_by(provincia, anio_retencion) %>% 
   summarise(n=n()) %>% 
   ungroup() %>% 
@@ -97,18 +142,26 @@ t02_p <- r1 %>%
 
 g02_p <- r1 %>% 
   filter(reino == "Plantae") %>% 
-  group_by(provincia, anio_retencion) %>%
-  summarise(n=n()) %>%
+  mutate(rnatura = case_when(provincia %in% c("01", "02", "03", "04", "05", 
+                                              "06", "10", "11", "17", "18") ~ "Sierra",
+                             provincia %in% c("07", "08", "09", "12", "13", 
+                                              "20", "23", "24") ~ "Costa",
+                             provincia %in% c("14", "15", "16", "19", "21", 
+                                              "22") ~ "Amazonía",
+                             T ~ "Niidea")) %>% 
+  group_by(rnatura, provincia, anio_retencion) %>%
+  summarise(n = n()) %>%
   ungroup() %>%
+  mutate(prov_ordenado = reorder_within(provincia, n, rnatura)) %>% 
   filter(anio_retencion != "no_declarado") %>%
-  mutate(provincia = factor(provincia,
-                            c("17", "24", "13", "09", "15", "07", "21", "05", "16", "14", "04", "11", "18", "22", "08", "10"),
-                            c("17", "24", "13", "09", "15", "07", "21", "05", "16", "14", "04", "11", "18", "22", "08", "10"))) %>% 
   ggplot() + 
-  geom_col(aes(provincia, n, fill = anio_retencion),
+  geom_col(aes(prov_ordenado, n, fill = anio_retencion),
            linewidth = 1.5,
            position = position_dodge()) +
-  theme_light()
+  coord_flip() +
+  facet_wrap(~ rnatura, scales = "free_y") + 
+  theme_light() +
+  scale_x_reordered(labels = function(x) gsub("__.+$", "", x))
 
 g02_p
 
