@@ -16,7 +16,7 @@ params:
 date: "2025-06-02"
 ---
 
-# MAATE
+Para el desarrollo de este layout, se utilizó la información de la base "recopilacion_Retenciones_9mayo2025_v2.0.xlsx". Cabe mencionar que en la base mencionada, no existe información para Galápagos, razón por la cual no se incluye.
 
 ## Continente
 
@@ -632,9 +632,7 @@ r1 %>%
   theme_light()
 ```
 
-## Galápagos
 
-No presenta información.
 
 
 
