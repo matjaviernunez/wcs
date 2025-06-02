@@ -1,0 +1,92 @@
+---
+title: CITES
+output:
+  html_document:
+    number_sections: yes
+    toc: yes
+    theme: bootstrap
+    highlight: tango
+    df_print: kable
+  pdf_document:
+    toc: yes
+    df_print: kable
+    number_sections: no
+params:
+  mes: NULL
+date: "2025-06-02"
+---
+
+```{r echo=F, message=F, warning=F, results='markup'}
+library(tidyverse)
+library(rio)
+library(sf)
+library(janitor)
+```
+
+### Número de exportaciones por año
+
+```{r echo=F, message=F, warning=F, results='markup'}
+cites |> 
+  group_by(anio) |>
+  summarise(eventos = n_distinct(cod_permiso)) |> 
+  mutate(anio = case_when(is.na(anio) ~ "No declarado",
+                          T ~ anio)) |> 
+  adorn_totals()
+```
+```{r echo=F, message=F, warning=F, results='markup'}
+cites |> 
+  group_by(anio) |>
+  summarise(eventos = n_distinct(cod_permiso)) |> 
+  mutate(anio = case_when(is.na(anio) ~ "No declarado",
+                          T ~ anio)) |> 
+  ggplot(aes(x = anio, y = eventos, fill = anio)) + 
+  geom_col()
+```
+
+### Número de exportaciones por año y tipo
+
+```{r echo=F, message=F, warning=F, results='markup'}
+cites |> 
+  group_by(anio, tipo) |>
+  summarise(eventos = n_distinct(cod_permiso)) |> 
+  mutate(anio = case_when(is.na(anio) ~ "No declarado",
+                          T ~ anio)) |> 
+  pivot_wider(names_from = anio, values_from = eventos, values_fill = 0) |> 
+  adorn_totals() |> 
+  adorn_totals("col")
+```
+```{r echo=F, message=F, warning=F, results='markup'}
+cites |> 
+  group_by(anio, tipo) |>
+  summarise(eventos = n_distinct(cod_permiso)) |> 
+  mutate(anio = case_when(is.na(anio) ~ "No declarado",
+                          T ~ anio)) |> 
+  ggplot(aes(x = anio, y = eventos, fill = tipo)) + 
+  geom_col()
+```
+
+### Número de exportaciones por año y proposito
+
+```{r echo=F, message=F, warning=F, results='markup'}
+cites |> 
+  group_by(anio, proposito) |>
+  summarise(eventos = n_distinct(cod_permiso)) |> 
+  mutate(anio = case_when(is.na(anio) ~ "No declarado",
+                          T ~ anio),
+         proposito = case_when(is.na(proposito) ~ "No declarado",
+                          T ~ proposito)) |> 
+  pivot_wider(names_from = anio, values_from = eventos, values_fill = 0) |> 
+  adorn_totals() |> 
+  adorn_totals("col")
+```
+```{r echo=F, message=F, warning=F, results='markup'}
+cites |> 
+  group_by(anio, proposito) |>
+  summarise(eventos = n_distinct(cod_permiso)) |> 
+  mutate(anio = case_when(is.na(anio) ~ "No declarado",
+                          T ~ anio),
+         proposito = case_when(is.na(proposito) ~ "No declarado",
+                          T ~ proposito)) |> 
+  ggplot(aes(x = anio, y = eventos, fill = proposito)) + 
+  geom_col()
+```

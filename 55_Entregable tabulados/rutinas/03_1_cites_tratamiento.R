@@ -142,3 +142,10 @@ export(apoyo_especie, "55_Entregable tabulados/intermedios/03_apoyo_cites_especi
 
 saveRDS(cites, "55_Entregable tabulados/intermedios/03_cites.rds")
 export(cites, "55_Entregable tabulados/intermedios/03_cites.xlsx")
+
+
+render(input="55_Entregable tabulados/rutinas/03_9_cites_layout.Rmd",
+       output_format="pdf_document", 
+       output_dir = "55_Entregable tabulados/intermedios/",
+       output_file = "03_cites_layout.pdf", 
+       knit_root_dir = getwd())
