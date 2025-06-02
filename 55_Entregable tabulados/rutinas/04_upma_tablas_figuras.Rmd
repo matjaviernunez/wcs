@@ -285,8 +285,9 @@ tab_07_con_fau_eve <- upma_rescate %>%
   summarise(evento = n_distinct(NUMERO_PARTE)) 
 
 tab_07_con_fau_eve |> pivot_wider(names_from = anio, values_from = evento) %>% 
-  adorn_totals() %>% 
-  adorn_totals("col")
+  adorn_totals("col") |> 
+  arrange(desc(Total)) |> 
+  adorn_totals()
 ```
 
 ```{r echo=F, message=F, warning=F, results='markup'}
@@ -361,9 +362,11 @@ tab_11_con_fau_can <- upma_carne %>%
   summarise(cantidad = sum(cantidad)) 
 
 tab_11_con_fau_can %>% 
-  pivot_wider(names_from = anio, values_from = cantidad) %>% 
-  adorn_totals() %>% 
-  adorn_totals("col")
+  pivot_wider(names_from = anio, values_from = cantidad, values_fill = 0) %>%  
+  adorn_totals("col") |> 
+  arrange(desc(Total)) |> 
+  adorn_totals()
+  
 ```
 
 ```{r echo=F, message=F, warning=F, results='markup'}
@@ -472,7 +475,7 @@ tab_10_gal_flo_can <- upma_flora_01 %>%
   summarise(cantidad = sum(cantidad)) 
 
 tab_10_gal_flo_can %>% 
-  pivot_wider(names_from = sub_categoria, values_from = cantidad) %>% 
+  pivot_wider(names_from = sub_categoria, values_from = cantidad, values_fill = 0) %>% 
   adorn_totals() %>% 
   adorn_totals("col")
 ```
