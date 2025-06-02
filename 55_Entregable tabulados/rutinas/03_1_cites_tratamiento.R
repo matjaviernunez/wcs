@@ -130,5 +130,22 @@ aux22_23 <- cites22_23 |>
 
 cites <- rbind(aux22_23, aux24)
 
+# especie 
+apoyo_especie <- cites %>% 
+  group_by(especie) %>% 
+  summarise()
+
+write.table(apoyo_especie, "55_Entregable tabulados/intermedios/03_apoyo_cites_especie.txt",fileEncoding = "UTF-8")
+
+export(apoyo_especie, "55_Entregable tabulados/intermedios/03_apoyo_cites_especie.xlsx")
+
+
 saveRDS(cites, "55_Entregable tabulados/intermedios/03_cites.rds")
 export(cites, "55_Entregable tabulados/intermedios/03_cites.xlsx")
+
+
+render(input="55_Entregable tabulados/rutinas/03_9_cites_layout.Rmd",
+       output_format="pdf_document", 
+       output_dir = "55_Entregable tabulados/intermedios/",
+       output_file = "03_cites_layout.pdf", 
+       knit_root_dir = getwd())
