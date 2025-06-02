@@ -135,6 +135,8 @@ apoyo_especie <- cites %>%
   group_by(especie) %>% 
   summarise()
 
+write.table(apoyo_especie, "55_Entregable tabulados/intermedios/03_apoyo_cites_especie.txt",fileEncoding = "UTF-8")
+
 export(apoyo_especie, "55_Entregable tabulados/intermedios/03_apoyo_cites_especie.xlsx")
 
 
