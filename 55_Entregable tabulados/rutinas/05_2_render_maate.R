@@ -40,8 +40,8 @@ r1 <- retenciones %>%
 
 rm(apoyo, respuesta, retenciones)
 #
-render(input="55_Entregable tabulados/rutinas/07_maate_upma_rmarkdown.Rmd",
+render(input="55_Entregable tabulados/rutinas/05_5_maate_rmarkdown.Rmd",
        output_format = "pdf_document", 
-       output_dir = "55_Entregable tabulados/productos/",
-       output_file = "informe_07_maate_upma.pdf",
+       output_dir = "55_Entregable tabulados/intermedios/",
+       output_file = "05_maate_layout.pdf",
        knit_root_dir = getwd())
