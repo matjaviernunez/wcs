@@ -4,6 +4,10 @@ library(tidyverse)
 library(rio)
 library(sf)
 library(janitor)
+library(forcats)
+library(tidytext)
+
+provincias <- read_sf("55_Entregable tabulados/insumos/provincias.gpkg")
 
 upma_flora <- import("55_Entregable tabulados/intermedios/04_upma_FORMATO DGO UPMA  FLORA 2022, 2023 Y 2024.xlsx")
 # la base de datos contempla dos columnas extra debido a un caso con un nombre y un número de cédula
@@ -55,21 +59,62 @@ tab_01_con_flo_eve <- upma_flora_01 %>%
   group_by(anio = substr(fecha_rescate, 1, 4)) %>% 
   summarise(evento = n()) %>% 
   adorn_totals()
+
+fig_01_con_flo_eve <- tab_01_con_flo_eve |> 
+  filter(anio != "Total") |> 
+  mutate(anio = as.numeric(anio)) |> 
+  ggplot(aes(x = anio, y = evento)) +
+  geom_line(linewidth = 1) + 
+  geom_point(size = 2)
+
   
 # Número de decomisos de madera por provincia 
 tab_02_con_flo_eve <- upma_flora_01 %>% 
-  group_by(anio = substr(fecha_rescate, 1, 4), cod_pro = substr(subcircuito, 1, 2)) %>% 
+  mutate(cod_pro = substr(subcircuito, 1, 2),
+         rnatura = case_when(cod_pro %in% c("01", "02", "03", "04", "05", 
+                                            "06", "10", "11", "17", "18") ~ "Sierra",
+                             cod_pro %in% c("07", "08", "09", "12", "13", 
+                                            "20", "23", "24") ~ "Costa",
+                             cod_pro %in% c("14", "15", "16", "19", "21", 
+                                            "22") ~ "Amazonía",
+                             T ~ "Niidea")) |> 
+  group_by(anio = substr(fecha_rescate, 1, 4), rnatura, cod_pro) %>% 
   summarise(evento = n()) %>% 
   filter(cod_pro != "20") %>% 
   pivot_wider(names_from = anio, values_from = evento) %>% 
   adorn_totals() %>% 
-  adorn_totals("col")
+  adorn_totals("col") |> 
+  arrange(rnatura, desc(Total))
+
+fig_02_con_flo_eve <- tab_02_con_flo_eve |> 
+  mutate(prov_ordenado = reorder_within(cod_pro, Total, rnatura)) |> 
+  filter(rnatura != "Total") %>%
+  ggplot() + 
+  geom_col(aes(prov_ordenado, Total),
+           linewidth = 1.5,
+           position = position_dodge()) +
+  coord_flip() +
+  facet_wrap(~ rnatura, scales = "free_y") + 
+  theme_light() +
+  scale_x_reordered(labels = function(x) gsub("__.+$", "", x))
+
+fig_02_con_flo_eve
+
 # Número de decomisos de madera en Galápagos
 tab_01_gal_flo_eve <- upma_flora_01 %>% 
   filter(substr(subcircuito, 1, 2) == "20") %>% 
   group_by(anio = substr(fecha_rescate, 1, 4)) %>% 
   summarise(evento = n()) %>% 
   adorn_totals()
+
+fig_01_gal_flo_eve <- tab_01_gal_flo_eve |> 
+  filter(anio != "Total") |> 
+  mutate(anio = as.numeric(anio)) |> 
+  ggplot(aes(x = anio, y = evento)) +
+  geom_line(linewidth = 1) + 
+  geom_point(size = 2)
+
+fig_01_gal_flo_eve
 # Consideramos "equivalente" madera y carne de monte
 # Cantidad de decomisos de madera por año
 tab_09_con_flo_can <- upma_flora_01 %>% 
@@ -77,22 +122,61 @@ tab_09_con_flo_can <- upma_flora_01 %>%
   group_by(anio = substr(fecha_rescate, 1, 4)) %>% 
   summarise(cantidad = sum(cantidad)) %>% 
   adorn_totals()
+
+fig_09_con_flo_can <- tab_09_con_flo_can |> 
+  filter(anio != "Total") |> 
+  mutate(anio = as.numeric(anio)) |> 
+  ggplot(aes(x = anio, y = cantidad)) +
+  geom_line(linewidth = 1) + 
+  geom_point(size = 2)
+
+fig_09_con_flo_can
+
 # Cantidad de decomisos de madera por año y sub categoría
 tab_10_con_flo_can <- upma_flora_01 %>% 
   filter(substr(subcircuito, 1, 2) != "20") %>% 
   group_by(anio = substr(fecha_rescate, 1, 4),sub_categoria) %>% 
-  summarise(cantidad = sum(cantidad)) %>% 
+  summarise(cantidad = sum(cantidad)) 
+
+tab_10_con_flo_can %>% 
   pivot_wider(names_from = sub_categoria, values_from = cantidad) %>% 
   adorn_totals() %>% 
   adorn_totals("col")
+
+fig_10_con_flo_can <- tab_10_con_flo_can |> 
+  ggplot() +
+  geom_col(aes(anio, cantidad),
+           linewidth = 1.5,
+           position = position_dodge()) +
+  coord_flip() +
+  facet_wrap(~ sub_categoria, scales = "free_y") + 
+  theme_light() +
+  scale_x_reordered(labels = function(x) gsub("__.+$", "", x))
+
+fig_10_con_flo_can
 # Cantidad de decomisos de madera por año y provincia
 tab_11_con_flo_can <- upma_flora_01 %>% 
   filter(substr(subcircuito, 1, 2) != "20") %>% 
   group_by(anio = substr(fecha_rescate, 1, 4),cod_pro = substr(subcircuito, 1, 2)) %>% 
-  summarise(cantidad = sum(cantidad)) %>% 
+  summarise(cantidad = sum(cantidad))
+
+tab_11_con_flo_can %>% 
   pivot_wider(names_from = anio, values_from = cantidad) %>% 
   adorn_totals() %>% 
   adorn_totals("col")
+
+fig_11_con_flo_can <- provincias |> 
+  filter(DPA_PROVIN != "20") |> 
+  left_join(tab_11_con_flo_can |> 
+              group_by(DPA_PROVIN = cod_pro) |> 
+              summarise(cantidad = sum(cantidad)),
+            by = "DPA_PROVIN") |> 
+  ggplot() + 
+  geom_sf(aes(fill = cantidad)) +
+  scale_fill_distiller(trans = "reverse")
+  
+fig_11_con_flo_can
+
 # asumiendo que la cantidad hace referencia unicamente a tipo_1
 tab_12_con_flo_can <- upma_flora_01 %>% 
   filter(substr(subcircuito, 1, 2) != "20") %>% 
@@ -100,33 +184,49 @@ tab_12_con_flo_can <- upma_flora_01 %>%
   summarise(cantidad = sum(cantidad)) %>% 
   arrange(desc(cantidad))
 
-
-
+### Galapagos
 # Cantidad de decomisos de madera por año
 tab_09_gal_flo_can <- upma_flora_01 %>% 
   filter(substr(subcircuito, 1, 2) == "20") %>% 
   group_by(anio = substr(fecha_rescate, 1, 4)) %>% 
   summarise(cantidad = sum(cantidad)) %>% 
   adorn_totals()
+
+fig_09_gal_flo_can <- tab_09_gal_flo_can |> 
+  filter(anio != "Total") |> 
+  mutate(anio = as.numeric(anio)) |> 
+  ggplot(aes(x = anio, y = cantidad)) +
+  geom_line(linewidth = 1) + 
+  geom_point(size = 2)
+
+fig_09_gal_flo_can
+
 # Cantidad de decomisos de madera por año y sub categoría
 tab_10_gal_flo_can <- upma_flora_01 %>% 
   filter(substr(subcircuito, 1, 2) == "20") %>% 
   group_by(anio = substr(fecha_rescate, 1, 4),sub_categoria) %>% 
-  summarise(cantidad = sum(cantidad)) %>% 
+  summarise(cantidad = sum(cantidad)) 
+
+tab_10_gal_flo_can %>% 
   pivot_wider(names_from = sub_categoria, values_from = cantidad) %>% 
   adorn_totals() %>% 
   adorn_totals("col")
-# Cantidad de decomisos de madera por año y provincia
-tab_11_gal_flo_can <- upma_flora_01 %>% 
-  filter(substr(subcircuito, 1, 2) == "20") %>% 
-  group_by(anio = substr(fecha_rescate, 1, 4),cod_pro = substr(subcircuito, 1, 2)) %>% 
-  summarise(cantidad = sum(cantidad)) %>% 
-  pivot_wider(names_from = anio, values_from = cantidad) %>% 
-  adorn_totals() %>% 
-  adorn_totals("col")
+
+fig_10_gal_flo_can <- tab_10_gal_flo_can |> 
+  ggplot() +
+  geom_col(aes(anio, cantidad),
+           linewidth = 1.5,
+           position = position_dodge()) +
+  coord_flip() +
+  facet_wrap(~ sub_categoria, scales = "free_y") + 
+  theme_light() +
+  scale_x_reordered(labels = function(x) gsub("__.+$", "", x))
+
+fig_10_gal_flo_can
+
 # asumiendo que la cantidad hace referencia unicamente a tipo_1
 tab_12_gal_flo_can <- upma_flora_01 %>% 
-  filter(substr(subcircuito, 1, 2) == "20") %>%
+  filter(substr(subcircuito, 1, 2) == "20") %>% 
   group_by(n_tipo_1) %>% 
   summarise(cantidad = sum(cantidad)) %>% 
   arrange(desc(cantidad))
@@ -143,78 +243,59 @@ upma_carne <- readRDS("55_Entregable tabulados/intermedios/04_upma_fauna_carne_d
 tab_09_con_fau_can <- upma_carne %>% 
   filter(cod_pro != "20") %>% 
   group_by(anio) %>% 
-  summarise(cantidad = sum(cantidad)) %>% 
+  summarise(cantidad = sum(cantidad)) 
+
+tab_09_con_fau_can %>% 
   adorn_totals()
+
+fig_09_con_fau_can <- tab_09_con_fau_can |> 
+  mutate(anio = as.numeric(anio)) |> 
+  ggplot(aes(x = anio, y = cantidad)) +
+  geom_line(linewidth = 1) + 
+  geom_point(size = 2)
+
 # kilogramos decomisados por taxon no se recomienda usar esta tabla pues no está adecuadamente
 # categorizada
 tab_10_con_fau_can <- upma_carne %>% 
   filter(cod_pro != "20") %>% 
   group_by(familia_especimen) %>% 
   summarise(cantidad = sum(cantidad))
-# kilogramos decomisados por provincia
-tab_11_con_fau_can <- upma_carne %>% 
-  filter(cod_pro != "20") %>% 
-  group_by(anio, cod_pro) %>% 
-  summarise(cantidad = sum(cantidad)) %>% 
-  pivot_wider(names_from = anio, values_from = cantidad) %>% 
-  adorn_totals() %>% 
-  adorn_totals("col")
 
 # kilogramos decomisados por provincia
 tab_11_con_fau_can <- upma_carne %>% 
   filter(cod_pro != "20") %>% 
   group_by(anio, cod_pro) %>% 
-  summarise(cantidad = sum(cantidad)) %>% 
+  summarise(cantidad = sum(cantidad)) 
+
+tab_11_con_fau_can %>% 
   pivot_wider(names_from = anio, values_from = cantidad) %>% 
   adorn_totals() %>% 
   adorn_totals("col")
 
-# kilogramos decomisados por provincia
+
+fig_11_con_fau_can <- provincias |> 
+  filter(DPA_PROVIN != "20") |> 
+  left_join(tab_11_con_fau_can |> 
+              group_by(DPA_PROVIN = cod_pro) |> 
+              summarise(cantidad = sum(cantidad)),
+            by = "DPA_PROVIN") |> 
+  ggplot() + 
+  geom_sf(aes(fill = cantidad)) +
+  scale_fill_distiller(trans = "reverse")
+
+fig_11_con_fau_can
+
+
+# especie más decomisada de carne de monte
 tab_12_con_fau_can <- upma_carne %>% 
   filter(cod_pro != "20") %>% 
   group_by(tipo_especimen_1) %>% 
   summarise(cantidad = sum(cantidad)) %>% 
   arrange(desc(cantidad))
 
+#### no se hace carne de monte para galápagos
+# porque no hay
 
-
-
-# kilogramos de carne de monte retenidad
-tab_09_gal_fau_gal <- upma_carne %>% 
-  filter(cod_pro == "20") %>% 
-  group_by(anio) %>% 
-  summarise(cantidad = sum(cantidad)) %>% 
-  adorn_totals()
-# kilogramos decomisados por taxon no se recomienda usar esta tabla pues no está adecuadamente
-# categorizada
-tab_10_gal_fau_gal <- upma_carne %>% 
-  filter(cod_pro == "20") %>% 
-  group_by(familia_especimen) %>% 
-  summarise(cantidad = sum(cantidad))
-# kilogramos decomisados por provincia
-tab_11_gal_fau_gal <- upma_carne %>% 
-  filter(cod_pro == "20") %>% 
-  group_by(anio, cod_pro) %>% 
-  summarise(cantidad = sum(cantidad)) %>% 
-  pivot_wider(names_from = anio, values_from = cantidad) %>% 
-  adorn_totals() %>% 
-  adorn_totals("col")
-
-# kilogramos decomisados por provincia
-tab_11_gal_fau_gal <- upma_carne %>% 
-  filter(cod_pro == "20") %>% 
-  group_by(anio, cod_pro) %>% 
-  summarise(cantidad = sum(cantidad)) %>% 
-  pivot_wider(names_from = anio, values_from = cantidad) %>% 
-  adorn_totals() %>% 
-  adorn_totals("col")
-
-# kilogramos decomisados por provincia
-tab_12_gal_fau_can <- upma_carne %>% 
-  filter(cod_pro == "20") %>% 
-  group_by(tipo_especimen_1) %>% 
-  summarise(cantidad = sum(cantidad)) %>% 
-  arrange(desc(cantidad))
 
 
 
@@ -351,5 +432,11 @@ tab_16_can <- cites %>%
   pivot_wider(names_from = anio, values_from = cantidad) %>% 
   adorn_totals() %>% 
   adorn_totals("col")
+
+
+
+#########################
+# FIGURAS
+
 
 

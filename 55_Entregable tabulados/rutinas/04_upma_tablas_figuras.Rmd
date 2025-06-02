@@ -1,0 +1,97 @@
+---
+title: Unidad de Policía del Medio Ambiente (UPMA)
+output:
+  html_document:
+    number_sections: yes
+    toc: yes
+    theme: bootstrap
+    highlight: tango
+    df_print: kable
+  pdf_document:
+    toc: yes
+    df_print: kable
+    number_sections: no
+params:
+  mes: NULL
+date: "2025-06-02"
+---
+
+```{r echo=F, message=F, warning=F, results='markup'}
+library(tidyverse)
+library(rio)
+library(sf)
+library(janitor)
+```
+
+A continuación se presentan las tablas y gráficos solicitados a partir de la base de UPMA separado en dos grandes secciones, Continente y Galápagos.
+
+# Continente
+
+## Flora
+
+Para la presentación de los resultados de flora se utilizó el archivo "FORMATO DGO UPMA  FLORA 2022, 2023 Y 2024.xlsx".
+
+### T01 - Número de decomisos (eventos) MAATE RETENCIONES VS UPMA por año
+
+```{r echo=F, message=F, warning=F, results='markup'}
+tab_01_con_flo_eve <- upma_flora_01 %>% 
+  filter(substr(subcircuito, 1, 2) != "20") %>% 
+  group_by(anio = substr(fecha_rescate, 1, 4)) %>% 
+  summarise(evento = n()) %>% 
+  adorn_totals()
+
+tab_01_con_flo_eve
+```
+
+```{r echo=F, message=F, warning=F, results='markup'}
+fig_01_con_flo_eve <- tab_01_con_flo_eve |> 
+  filter(anio != "Total") |> 
+  mutate(anio = as.numeric(anio)) |> 
+  ggplot(aes(x = anio, y = evento)) +
+  geom_line()
+
+fig_01_con_flo_eve
+```
+
+### T02 Provincias total por año MAATE RETENCIONES VS UPMA
+
+Número de decomisos de madera por provincia 
+
+```{r echo=F, message=F, warning=F, results='markup'}
+
+tab_02_con_flo_eve <- upma_flora_01 %>% 
+  mutate(cod_pro = substr(subcircuito, 1, 2),
+         rnatura = case_when(cod_pro %in% c("01", "02", "03", "04", "05", 
+                                            "06", "10", "11", "17", "18") ~ "Sierra",
+                             cod_pro %in% c("07", "08", "09", "12", "13", 
+                                            "20", "23", "24") ~ "Costa",
+                             cod_pro %in% c("14", "15", "16", "19", "21", 
+                                            "22") ~ "Amazonía",
+                             T ~ "Niidea")) |> 
+  group_by(anio = substr(fecha_rescate, 1, 4), rnatura, cod_pro) %>% 
+  summarise(evento = n()) %>% 
+  filter(cod_pro != "20") %>% 
+  pivot_wider(names_from = anio, values_from = evento) %>% 
+  adorn_totals() %>% 
+  adorn_totals("col") |> 
+  arrange(rnatura, desc(Total))
+tab_02_con_flo_eve
+```
+
+```{r echo=F, message=F, warning=F, results='markup'}
+fig_02_con_flo_eve <- tab_02_con_flo_eve |> 
+  mutate(prov_ordenado = reorder_within(cod_pro, Total, rnatura)) |> 
+  filter(rnatura != "Total") %>%
+  ggplot() + 
+  geom_col(aes(prov_ordenado, Total),
+           linewidth = 1.5,
+           position = position_dodge()) +
+  coord_flip() +
+  facet_wrap(~ rnatura, scales = "free_y") + 
+  theme_light() +
+  scale_x_reordered(labels = function(x) gsub("__.+$", "", x))
+
+fig_02_con_flo_eve
+```
+
+### T03 
