@@ -6,6 +6,9 @@ library(sf)
 library(janitor)
 library(rmarkdown)
 
+
+provincias <- read_sf("55_Entregable tabulados/insumos/provincias.gpkg")
+
 upma_flora <- import("55_Entregable tabulados/intermedios/04_upma_FORMATO DGO UPMA  FLORA 2022, 2023 Y 2024.xlsx")
 # la base de datos contempla dos columnas extra debido a un caso con un nombre y un número de cédula
 
@@ -16,6 +19,12 @@ aux_tipo_upma_flora <- upma_flora %>%  group_by(`TIPO I`) %>%
 # export(aux_tipo_upma_flora, "55_Entregable tabulados/intermedios/04_aux_tipo_upma_flora.xlsx")
 
 auxiliar_tipo <- import("55_Entregable tabulados/intermedios/04_aux_tipo_upma_flora.xlsx")
+
+upma_carne <- readRDS("55_Entregable tabulados/intermedios/04_upma_fauna_carne_de_monte.rds") %>% 
+  filter(tipo_delito == "CARNE DE FAUNA SILVESTRE RETENIDA") %>% 
+  mutate(cantidad = as.numeric(cantidad),
+         anio = substr(fecha_operativo, 1, 4),
+         cod_pro = substr(cod_subcircuito, 1, 2)) 
 
 upma_flora_01 <- upma_flora %>% 
   select(-`...23`, -`...22`) %>% 
