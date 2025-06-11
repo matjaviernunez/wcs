@@ -202,8 +202,34 @@ tab_12_con_flo_can |>
   filter(row_number() <= 10)
 
 ```
+### T12_1 - Kg de carne de monte decomisada 5 o 10 sp con mayor cantidad (árboles) maderable
 
+```{r echo=F, message=F, warning=F, results='markup'}
 
+tab_12_con_flo_can_mad <- upma_flora_01 %>% 
+  filter(substr(subcircuito, 1, 2) != "20", sub_categoria == "MADERABLE") %>% 
+  group_by(n_tipo_1) %>% 
+  summarise(cantidad = sum(cantidad)) %>% 
+  arrange(desc(cantidad))
+
+tab_12_con_flo_can_mad |> 
+  filter(row_number() <= 10)
+
+```
+### T12_2 - Kg de carne de monte decomisada 5 o 10 sp con mayor cantidad (árboles) no maderable
+
+```{r echo=F, message=F, warning=F, results='markup'}
+
+tab_12_con_flo_can_nmad <- upma_flora_01 %>% 
+  filter(substr(subcircuito, 1, 2) != "20", sub_categoria == "NO MADERABLE") %>% 
+  group_by(n_tipo_1) %>% 
+  summarise(cantidad = sum(cantidad)) %>% 
+  arrange(desc(cantidad))
+
+tab_12_con_flo_can_nmad |> 
+  filter(row_number() <= 10)
+
+```
 
 
 
