@@ -173,7 +173,7 @@ t08 <- r1 %>%
   arrange(clase, desc(n)) %>% 
   group_by(clase) %>% 
   mutate(nr = row_number()) %>% 
-  filter(nr <= 5) %>% 
+  filter(nr <= 10) %>% 
   select(-nr)
 
 t08 %>% 
@@ -187,7 +187,7 @@ t08 %>%
   facet_wrap(~ clase, scales = "free_y", ncol = 2) +
   theme_light() +
   coord_flip() +  
-  theme(axis.text.x = element_text(angle = 30, hjust = 1, size = 7),
+  theme(axis.text.y = element_text(hjust = 1, size = 6),
         legend.position = "none")
 ```
 
@@ -202,10 +202,13 @@ r1 %>%
          elemento_constitutivo = ifelse(is.na(elemento_constitutivo), "No declarado", elemento_constitutivo),
          elemento_constitutivo= ifelse(elemento_constitutivo == "Especimen Disecado", "Especimen disecado", elemento_constitutivo),
          elemento_constitutivo= ifelse(elemento_constitutivo == "piel", "Piel", elemento_constitutivo)) %>% 
-  group_by(elemento_constitutivo) %>% 
+  group_by(elemento_constitutivo, unidad) %>% 
   summarise(n = sum(cantidad)) %>% 
   ungroup() %>% 
-  arrange(desc(n))
+  pivot_wider(names_from = unidad, values_from = n, values_fill = 0) %>% 
+  adorn_totals("col") %>% 
+  arrange(desc(Total)) %>% 
+  select(-Total)
 ```
 ```{r echo=F, message=F, warning=F, results='markup'}
 t13 <- r1 %>% 
@@ -217,7 +220,7 @@ t13 <- r1 %>%
          elemento_constitutivo = ifelse(is.na(elemento_constitutivo), "No declarado", elemento_constitutivo),
          elemento_constitutivo= ifelse(elemento_constitutivo == "Especimen Disecado", "Especimen disecado", elemento_constitutivo),
          elemento_constitutivo= ifelse(elemento_constitutivo == "piel", "Piel", elemento_constitutivo)) %>% 
-  group_by(elemento_constitutivo) %>% 
+  group_by(elemento_constitutivo, unidad) %>% 
   summarise(n = sum(cantidad)) %>% 
   ungroup() %>% 
   arrange(desc(n))
@@ -232,8 +235,8 @@ t13 %>%
            position = position_dodge()) +
   coord_flip() +
   theme_light() +
-  theme(axis.text.x = element_text(angle = 30, hjust = 1, size = 7),
-        legend.position = "none")
+  theme(legend.position = "none") + 
+  facet_wrap(~ unidad, scales = "free")
 ```
 
 T14.- Cantidad de elementos constitutivos por tipo (huevos, huesos, etc) por provincia apilado
@@ -247,10 +250,13 @@ r1 %>%
          elemento_constitutivo = ifelse(is.na(elemento_constitutivo), "No declarado", elemento_constitutivo),
          elemento_constitutivo= ifelse(elemento_constitutivo == "Especimen Disecado", "Especimen disecado", elemento_constitutivo),
          elemento_constitutivo= ifelse(elemento_constitutivo == "piel", "Piel", elemento_constitutivo)) %>% 
-  group_by(provincia, elemento_constitutivo) %>% 
+  group_by(provincia, elemento_constitutivo, unidad) %>% 
   summarise(n = sum(cantidad)) %>% 
   ungroup() %>% 
-  arrange(provincia, desc(n))
+  pivot_wider(names_from = unidad, values_from = n, values_fill = 0) %>% 
+  adorn_totals("col") %>% 
+  arrange(provincia, desc(Total)) %>% 
+  select(-Total)
 ```
 ```{r echo=F, message=F, warning=F, results='markup'}
 t14 <- r1 %>% 
@@ -262,7 +268,7 @@ t14 <- r1 %>%
          elemento_constitutivo = ifelse(is.na(elemento_constitutivo), "No declarado", elemento_constitutivo),
          elemento_constitutivo= ifelse(elemento_constitutivo == "Especimen Disecado", "Especimen disecado", elemento_constitutivo),
          elemento_constitutivo= ifelse(elemento_constitutivo == "piel", "Piel", elemento_constitutivo)) %>% 
-  group_by(provincia, elemento_constitutivo) %>% 
+  group_by(provincia, elemento_constitutivo, unidad) %>% 
   summarise(n = sum(cantidad)) %>% 
   ungroup() %>% 
   arrange(provincia, desc(n))
@@ -277,7 +283,8 @@ t14 %>%
   coord_flip() +
   theme_light() +
   theme(axis.text.x = element_text(angle = 30, hjust = 1, size = 7),
-        legend.position = "bottom")
+        legend.position = "bottom")  + 
+  facet_wrap(~ unidad, scales = "free")
 ```
 
 T15.- Cantidad de elementos constitutivos por tipo (huevos, huesos, etc) por taxones
@@ -291,10 +298,13 @@ r1 %>%
          elemento_constitutivo = ifelse(is.na(elemento_constitutivo), "No declarado", elemento_constitutivo),
          elemento_constitutivo= ifelse(elemento_constitutivo == "Especimen Disecado", "Especimen disecado", elemento_constitutivo),
          elemento_constitutivo= ifelse(elemento_constitutivo == "piel", "Piel", elemento_constitutivo)) %>% 
-  group_by(clase, elemento_constitutivo) %>% 
+  group_by(clase, elemento_constitutivo, unidad) %>% 
   summarise(n = sum(cantidad)) %>% 
   ungroup() %>% 
-  arrange(clase, desc(n))
+  pivot_wider(names_from = unidad, values_from = n, values_fill = 0) %>% 
+  adorn_totals("col") %>% 
+  arrange(desc(Total)) %>% 
+  select(-Total)
 ```
 ```{r echo=F, message=F, warning=F, results='markup'}
 t15 <- r1 %>% 
@@ -306,7 +316,7 @@ t15 <- r1 %>%
          elemento_constitutivo = ifelse(is.na(elemento_constitutivo), "No declarado", elemento_constitutivo),
          elemento_constitutivo= ifelse(elemento_constitutivo == "Especimen Disecado", "Especimen disecado", elemento_constitutivo),
          elemento_constitutivo= ifelse(elemento_constitutivo == "piel", "Piel", elemento_constitutivo)) %>% 
-  group_by(clase, elemento_constitutivo) %>% 
+  group_by(clase, elemento_constitutivo, unidad) %>% 
   summarise(n = sum(cantidad)) %>% 
   ungroup() %>% 
   arrange(clase, desc(n))
@@ -321,7 +331,8 @@ t15 %>%
   coord_flip() +
   theme_light() +
   scale_x_reordered(labels = function(x) gsub("__.+$", "", x)) +
-  theme(legend.position = "none")
+  theme(legend.position = "none") +
+  facet_wrap( ~ unidad, scales = "free")
 ```
 
 T23.- causal coip por taxon
