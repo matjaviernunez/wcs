@@ -61,11 +61,14 @@ rm(judicatura_ci, judicatura_cr, judicatura_cre)
 
 provincias <- read_sf("55_Entregable tabulados/insumos/provincias.gpkg")
 
-render(input="06_Entregable 4/previo/ag/02_2_judicatura_rmarkdown.Rmd",
+render(input="06_Entregable 4/previo/02_2_judicatura_rmarkdown.Rmd",
        output_format="pdf_document", 
-       output_dir = "06_Entregable 4/previo/ag/",
+       output_dir = "06_Entregable 4/previo/",
        output_file = "02_judicatura_informe.pdf",
        knit_root_dir = getwd())
 
 saveRDS(judicatura,
-     file = "06_Entregable 4/previo/ag/02_judicatura_bdd.rds")
+     file = "06_Entregable 4/previo/02_judicatura_bdd.rds")
+
+export(judicatura,
+        file = "06_Entregable 4/previo/02_judicatura_bdd.xlsx")

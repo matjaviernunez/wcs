@@ -131,7 +131,9 @@ aux22_23 <- cites22_23 |>
 
 cites <- rbind(aux22_23, aux24)
 
-saveRDS(cites, "06_Entregable 4/previo/ag/04_cites.rds")
+saveRDS(cites, "06_Entregable 4/previo/04_cites.rds")
+
+export(cites, "06_Entregable 4/previo/04_cites.xlsx")
 
 npais <- import("05_Entregable 3/envio/Dominio de Valores/CITES/codigos_cites.xlsx",
                 sheet = "pais")
@@ -154,8 +156,8 @@ verde_paleta <- colorRampPalette(c("#f0f0f0", "#74c476","#2a4d38"))
 
 colores <- verde_paleta(dim(apoyo01)[1])
 
-render(input="06_Entregable 4/previo/ag/04_2_cites_rmarkdown.Rmd",
+render(input="06_Entregable 4/previo/04_2_cites_rmarkdown.Rmd",
        output_format="pdf_document", 
-       output_dir = "06_Entregable 4/previo/ag/",
+       output_dir = "06_Entregable 4/previo/",
        output_file = "04_cites_informe.pdf", 
        knit_root_dir = getwd())

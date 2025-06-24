@@ -46,11 +46,14 @@ fiscalia <- import("02_Bases de Datos 2025/Fiscalía/Informe_estadistico_2025012
 
 provincias <- read_sf("55_Entregable tabulados/insumos/provincias.gpkg")
 
-render(input="06_Entregable 4/previo/ag/01_2_fiscalia_rmarkdown.Rmd",
+render(input="06_Entregable 4/previo/01_2_fiscalia_rmarkdown.Rmd",
        output_format="pdf_document", 
-       output_dir = "06_Entregable 4/previo/ag/",
+       output_dir = "06_Entregable 4/previo/",
        output_file = "01_fiscalia_informe.pdf",
        knit_root_dir = getwd())
 
 saveRDS(fiscalia,
-        file = "06_Entregable 4/previo/ag/01_fiscalia_bdd.rds")
+        file = "06_Entregable 4/previo/01_fiscalia_bdd.rds")
+
+export(fiscalia,
+       file = "06_Entregable 4/previo/01_fiscalia_bdd.xlsx")
