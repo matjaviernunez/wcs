@@ -5,6 +5,7 @@ library(rio)
 library(sf)
 library(janitor)
 library(rmarkdown)
+library(tidytext)
 
 
 provincias <- read_sf("55_Entregable tabulados/insumos/provincias.gpkg")
@@ -77,7 +78,7 @@ upma_rescate <- import("55_Entregable tabulados/intermedios/04_upma_RESCATE DE F
                                   T ~ "OTROS"),
          cod_pro = substr(`CODIGO SUBCIRCUITO`, 1, 2))
 
-render(input="55_Entregable tabulados/rutinas/04_upma_tablas_figuras.Rmd",
+render(input="55_Entregable tabulados/rutinas/04_5_upma_rmarkdown.Rmd",
        output_format="pdf_document", 
        output_dir = "55_Entregable tabulados/intermedios/",
        output_file = "04_upma_layout.pdf", 
