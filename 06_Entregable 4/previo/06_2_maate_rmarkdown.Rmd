@@ -1,5 +1,5 @@
 ---
-title: MAATE y UPMA
+title: Ministerio de Ambiente, Agua y Transición Ecológica (MAATE)
 output:
   pdf_document:
     toc: yes
@@ -11,8 +11,9 @@ output:
     theme: bootstrap
     highlight: tango
     df_print: kable
-params:
+  params:
   mes: NULL
+header-includes: \renewcommand{\contentsname}{Contenido}
 date: "2025-06-02"
 ---
 
