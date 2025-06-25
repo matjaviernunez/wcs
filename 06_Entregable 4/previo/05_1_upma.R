@@ -81,6 +81,6 @@ upma_rescate <- import("55_Entregable tabulados/intermedios/04_upma_RESCATE DE F
 render(input="06_Entregable 4/previo/05_2_upma_rmarkdown.Rmd",
        output_format="pdf_document", 
        output_dir = "06_Entregable 4/previo/",
-       output_file = "05_upma_layout.pdf", 
+       output_file = "05_upma_informe.pdf", 
        knit_root_dir = getwd())
 

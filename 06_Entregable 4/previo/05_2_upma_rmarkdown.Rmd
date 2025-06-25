@@ -11,6 +11,7 @@ output:
     toc: yes
     df_print: kable
     number_sections: no
+header-includes: \renewcommand{\contentsname}{Contenido}
 params:
   mes: NULL
 date: "2025-06-02"
@@ -48,7 +49,8 @@ fig_01_con_flo_eve <- tab_01_con_flo_eve |>
   filter(anio != "Total") |> 
   mutate(anio = as.numeric(anio)) |> 
   ggplot(aes(x = anio, y = evento)) +
-  geom_line()
+  geom_line() +
+  theme_light()
 
 fig_01_con_flo_eve
 ```
@@ -82,14 +84,14 @@ tab_02_con_flo_eve
 fig_02_con_flo_eve <- tab_02_con_flo_eve |> 
   mutate(prov_ordenado = reorder_within(cod_pro, Total, rnatura)) |> 
   filter(rnatura != "Total") %>%
-  ggplot() + 
+  ggplot(aes(fill = cod_pro)) + 
   geom_col(aes(prov_ordenado, Total),
            linewidth = 1.5,
            position = position_dodge()) +
   coord_flip() +
   facet_wrap(~ rnatura, scales = "free_y") + 
-  theme_light() +
-  scale_x_reordered(labels = function(x) gsub("__.+$", "", x))
+  scale_x_reordered(labels = function(x) gsub("__.+$", "", x)) +
+  theme_light() 
 
 fig_02_con_flo_eve
 ```
@@ -112,8 +114,8 @@ fig_09_con_flo_can <- tab_09_con_flo_can |>
   filter(anio != "Total") |> 
   mutate(anio = as.numeric(anio)) |> 
   ggplot(aes(x = anio, y = cantidad)) +
-  geom_line(linewidth = 1) + 
-  geom_point(size = 2)
+  geom_line() + 
+  theme_light()
 
 fig_09_con_flo_can
 ```
@@ -140,13 +142,14 @@ tab_10_con_flo_can %>%
 ```{r echo=F, message=F, warning=F, results='markup'}
 fig_10_con_flo_can <- tab_10_con_flo_can |> 
   ggplot() +
-  geom_col(aes(anio, cantidad),
+  geom_col(aes(anio, cantidad, fill = anio),
            linewidth = 1.5,
            position = position_dodge()) +
   coord_flip() +
   facet_wrap(~ sub_categoria, scales = "free_y") + 
   theme_light() +
-  scale_x_reordered(labels = function(x) gsub("__.+$", "", x))
+  scale_x_reordered(labels = function(x) gsub("__.+$", "", x)) +
+  theme_light()
 
 fig_10_con_flo_can
 ```
@@ -179,7 +182,8 @@ fig_11_con_flo_can <- provincias |>
             by = "DPA_PROVIN") |> 
   ggplot() + 
   geom_sf(aes(fill = cantidad)) +
-  scale_fill_distiller(trans = "reverse")
+  scale_fill_distiller(trans = "reverse") +
+  theme_light()
   
 fig_11_con_flo_can
 ```
@@ -257,7 +261,8 @@ fig_01_con_fau_eve <- tab_01_con_fau_eve |>
   filter(anio != "Total") |> 
   mutate(anio = as.numeric(anio)) |> 
   ggplot(aes(x = anio, y = evento)) +
-  geom_line()
+  geom_line() +
+  theme_light()
 
 fig_01_con_fau_eve
 ```
@@ -290,13 +295,14 @@ fig_02_con_fau_eve <- tab_02_con_fau_eve |>
   mutate(prov_ordenado = reorder_within(cod_pro, Total, rnatura)) |> 
   filter(rnatura != "Total") %>%
   ggplot() + 
-  geom_col(aes(prov_ordenado, Total),
+  geom_col(aes(prov_ordenado, Total, fill = cod_pro),
            linewidth = 1.5,
            position = position_dodge()) +
   coord_flip() +
   facet_wrap(~ rnatura, scales = "free_y") + 
   theme_light() +
-  scale_x_reordered(labels = function(x) gsub("__.+$", "", x))
+  scale_x_reordered(labels = function(x) gsub("__.+$", "", x)) +
+  theme_light()
 
 fig_02_con_fau_eve
 ```
@@ -350,8 +356,8 @@ tab_09_con_fau_can %>%
 fig_09_con_fau_can <- tab_09_con_fau_can |> 
   mutate(anio = as.numeric(anio)) |> 
   ggplot(aes(x = anio, y = cantidad)) +
-  geom_line(linewidth = 1) + 
-  geom_point(size = 2)
+  geom_line() + 
+  theme_light()
 
 fig_09_con_fau_can
 ```
@@ -404,7 +410,8 @@ fig_11_con_fau_can <- provincias |>
             by = "DPA_PROVIN") |> 
   ggplot() + 
   geom_sf(aes(fill = cantidad)) +
-  scale_fill_distiller(trans = "reverse")
+  scale_fill_distiller(trans = "reverse") +
+  theme_light()
 
 fig_11_con_fau_can
 ```
@@ -457,7 +464,8 @@ fig_01_gal_flo_eve <- tab_01_gal_flo_eve |>
   filter(anio != "Total") |> 
   mutate(anio = as.numeric(anio)) |> 
   ggplot(aes(x = anio, y = evento)) +
-  geom_line()
+  geom_line() +
+  theme_light()
 
 fig_01_gal_flo_eve
 ```
@@ -481,8 +489,8 @@ fig_09_gal_flo_can <- tab_09_gal_flo_can |>
   filter(anio != "Total") |> 
   mutate(anio = as.numeric(anio)) |> 
   ggplot(aes(x = anio, y = cantidad)) +
-  geom_line(linewidth = 1) + 
-  geom_point(size = 2)
+  geom_line() + 
+  theme_light()
 
 fig_09_gal_flo_can
 ```
@@ -509,13 +517,14 @@ tab_10_gal_flo_can %>%
 ```{r echo=F, message=F, warning=F, results='markup'}
 fig_10_gal_flo_can <- tab_10_gal_flo_can |> 
   ggplot() +
-  geom_col(aes(anio, cantidad),
+  geom_col(aes(anio, cantidad, fill = anio),
            linewidth = 1.5,
            position = position_dodge()) +
   coord_flip() +
   facet_wrap(~ sub_categoria, scales = "free_y") + 
   theme_light() +
-  scale_x_reordered(labels = function(x) gsub("__.+$", "", x))
+  scale_x_reordered(labels = function(x) gsub("__.+$", "", x)) +
+  theme_light()
 
 fig_10_gal_flo_can
 ```
@@ -568,7 +577,8 @@ fig_01_gal_fau_eve <- tab_01_gal_fau_eve |>
   filter(anio != "Total") |> 
   mutate(anio = as.numeric(anio)) |> 
   ggplot(aes(x = anio, y = evento)) +
-  geom_line()
+  geom_line() +
+  theme_light()
 
 fig_01_gal_fau_eve
 ```
