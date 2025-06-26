@@ -1,5 +1,5 @@
 ---
-title: MAATE y UPMA
+title: Ministerio de Ambiente, Agua y Transición Ecológica (MAATE)
 output:
   pdf_document:
     toc: yes
@@ -11,8 +11,9 @@ output:
     theme: bootstrap
     highlight: tango
     df_print: kable
-params:
+  params:
   mes: NULL
+header-includes: \renewcommand{\contentsname}{Contenido}
 date: "2025-06-02"
 ---
 
@@ -49,6 +50,13 @@ T02.- Provincias total por año MAATE RETENCIONES VS UPMA
 ```{r echo=F, message=F, warning=F, results='markup'}
 r1 %>% 
   filter(reino == "Animal") %>% 
+  mutate(rnatura = case_when(provincia %in% c("01", "02", "03", "04", "05", 
+                                               "06", "10", "11", "17", "18") ~ "Sierra",
+                             provincia %in% c("07", "08", "09", "12", "13", 
+                                               "20", "23", "24") ~ "Costa",
+                             provincia %in% c("14", "15", "16", "19", "21", 
+                                               "22") ~ "Amazonía",
+                             T ~ "Niidea")) %>% 
   group_by(rnatura, provincia, anio_retencion) %>% 
   summarise(n = n()) %>% 
   ungroup() %>% 
@@ -58,6 +66,13 @@ r1 %>%
 ```{r echo=F, message=F, warning=F, results='markup'}
 r1 %>% 
   filter(reino == "Animal") %>% 
+  mutate(rnatura = case_when(provincia %in% c("01", "02", "03", "04", "05", 
+                                              "06", "10", "11", "17", "18") ~ "Sierra",
+                             provincia %in% c("07", "08", "09", "12", "13", 
+                                              "20", "23", "24") ~ "Costa",
+                             provincia %in% c("14", "15", "16", "19", "21", 
+                                              "22") ~ "Amazonía",
+                             T ~ "Niidea")) %>% 
   group_by(rnatura, provincia, anio_retencion) %>%
   summarise(n = n()) %>%
   ungroup() %>%
@@ -100,23 +115,24 @@ provincias %>%
 
 T07.- Número de especímenes vivos decomisados por grupo taxonómico misma tendencia?
 ```{r echo=F, message=F, warning=F, results='markup'}
-# nro_total (?)
 r1 %>% 
   filter(elemento_retenido == "Especimen Vivo") %>% 
+  mutate(nro_total = case_when(is.na(nro_total) & !is.na(cantidad) ~ cantidad,
+                              T ~ 1)) %>% 
   group_by(clase) %>% 
   summarise(n = sum(nro_total)) %>% 
   ungroup() %>% 
   arrange(desc(n))
 ```
 ```{r echo=F, message=F, warning=F, results='markup'}
-## nro_total (?)
 t07 <- r1 %>% 
   filter(elemento_retenido == "Especimen Vivo") %>% 
+  mutate(nro_total = case_when(is.na(nro_total) & !is.na(cantidad) ~ cantidad,
+                              T ~ 1)) %>% 
   group_by(clase) %>% 
   summarise(n = sum(nro_total)) %>% 
   ungroup() %>% 
   arrange(desc(n))
-
 t07 %>% 
   mutate(clase = factor(clase,
                             .$clase[order(.$n, decreasing = T)],
@@ -132,6 +148,10 @@ T08.- sp mayormente decomisadas para aves, reptiles, mamíferos….
 ```{r echo=F, message=F, warning=F, results='markup'}
 r1 %>% 
   filter(elemento_retenido == "Especimen Vivo") %>% 
+  mutate(nro_total = case_when(is.na(nro_total) & !is.na(cantidad) ~ cantidad,
+                               is.na(nro_total) ~ 1,
+                               T ~ nro_total),
+         nombre_cientifico = ifelse(is.na(nombre_cientifico), "no_declarado", nombre_cientifico)) %>% 
   group_by(clase, nombre_cientifico) %>% 
   summarise(n = sum(nro_total)) %>% 
   ungroup() %>% 
@@ -144,6 +164,10 @@ r1 %>%
 ```{r echo=F, message=F, warning=F, results='markup'}
 t08 <- r1 %>% 
   filter(elemento_retenido == "Especimen Vivo") %>% 
+  mutate(nro_total = case_when(is.na(nro_total) & !is.na(cantidad) ~ cantidad,
+                               is.na(nro_total) ~ 1,
+                               T ~ nro_total),
+         nombre_cientifico = ifelse(is.na(nombre_cientifico), "no_declarado", nombre_cientifico)) %>% 
   group_by(clase, nombre_cientifico) %>% 
   summarise(n = sum(nro_total)) %>% 
   ungroup() %>% 
@@ -172,6 +196,13 @@ T13.- Cantidad de elementos constitutivos por tipo (huevos, huesos, etc
 ```{r echo=F, message=F, warning=F, results='markup'}
 r1 %>% 
   filter(elemento_retenido == "Elementos constitutivos") %>% 
+  mutate(cantidad = case_when(elemento_constitutivo == "4 especímenes muertos" ~ 4,
+                              is.na(cantidad) & !is.na(nro_indeterminados) ~ nro_indeterminados,
+                              is.na(cantidad) ~ 1,
+                              T ~ cantidad),
+         elemento_constitutivo = ifelse(is.na(elemento_constitutivo), "No declarado", elemento_constitutivo),
+         elemento_constitutivo= ifelse(elemento_constitutivo == "Especimen Disecado", "Especimen disecado", elemento_constitutivo),
+         elemento_constitutivo= ifelse(elemento_constitutivo == "piel", "Piel", elemento_constitutivo)) %>% 
   group_by(elemento_constitutivo, unidad) %>% 
   summarise(n = sum(cantidad)) %>% 
   ungroup() %>% 
@@ -183,6 +214,13 @@ r1 %>%
 ```{r echo=F, message=F, warning=F, results='markup'}
 t13 <- r1 %>% 
   filter(elemento_retenido == "Elementos constitutivos") %>% 
+  mutate(cantidad = case_when(elemento_constitutivo == "4 especímenes muertos" ~ 4,
+                              is.na(cantidad) & !is.na(nro_indeterminados) ~ nro_indeterminados,
+                              is.na(cantidad) ~ 1,
+                              T ~ cantidad),
+         elemento_constitutivo = ifelse(is.na(elemento_constitutivo), "No declarado", elemento_constitutivo),
+         elemento_constitutivo= ifelse(elemento_constitutivo == "Especimen Disecado", "Especimen disecado", elemento_constitutivo),
+         elemento_constitutivo= ifelse(elemento_constitutivo == "piel", "Piel", elemento_constitutivo)) %>% 
   group_by(elemento_constitutivo, unidad) %>% 
   summarise(n = sum(cantidad)) %>% 
   ungroup() %>% 
@@ -206,6 +244,13 @@ T14.- Cantidad de elementos constitutivos por tipo (huevos, huesos, etc) por pro
 ```{r echo=F, message=F, warning=F, results='markup'}
 r1 %>% 
   filter(elemento_retenido == "Elementos constitutivos") %>% 
+  mutate(cantidad = case_when(elemento_constitutivo == "4 especímenes muertos" ~ 4,
+                              is.na(cantidad) & !is.na(nro_indeterminados) ~ nro_indeterminados,
+                              is.na(cantidad) ~ 1,
+                              T ~ cantidad),
+         elemento_constitutivo = ifelse(is.na(elemento_constitutivo), "No declarado", elemento_constitutivo),
+         elemento_constitutivo= ifelse(elemento_constitutivo == "Especimen Disecado", "Especimen disecado", elemento_constitutivo),
+         elemento_constitutivo= ifelse(elemento_constitutivo == "piel", "Piel", elemento_constitutivo)) %>% 
   group_by(provincia, elemento_constitutivo, unidad) %>% 
   summarise(n = sum(cantidad)) %>% 
   ungroup() %>% 
@@ -217,6 +262,13 @@ r1 %>%
 ```{r echo=F, message=F, warning=F, results='markup'}
 t14 <- r1 %>% 
   filter(elemento_retenido == "Elementos constitutivos") %>% 
+  mutate(cantidad = case_when(elemento_constitutivo == "4 especímenes muertos" ~ 4,
+                              is.na(cantidad) & !is.na(nro_indeterminados) ~ nro_indeterminados,
+                              is.na(cantidad) ~ 1,
+                              T ~ cantidad),
+         elemento_constitutivo = ifelse(is.na(elemento_constitutivo), "No declarado", elemento_constitutivo),
+         elemento_constitutivo= ifelse(elemento_constitutivo == "Especimen Disecado", "Especimen disecado", elemento_constitutivo),
+         elemento_constitutivo= ifelse(elemento_constitutivo == "piel", "Piel", elemento_constitutivo)) %>% 
   group_by(provincia, elemento_constitutivo, unidad) %>% 
   summarise(n = sum(cantidad)) %>% 
   ungroup() %>% 
@@ -240,6 +292,13 @@ T15.- Cantidad de elementos constitutivos por tipo (huevos, huesos, etc) por tax
 ```{r echo=F, message=F, warning=F, results='markup'}
 r1 %>% 
   filter(elemento_retenido == "Elementos constitutivos") %>% 
+  mutate(cantidad = case_when(elemento_constitutivo == "4 especímenes muertos" ~ 4,
+                              is.na(cantidad) & !is.na(nro_indeterminados) ~ nro_indeterminados,
+                              is.na(cantidad) ~ 1,
+                              T ~ cantidad),
+         elemento_constitutivo = ifelse(is.na(elemento_constitutivo), "No declarado", elemento_constitutivo),
+         elemento_constitutivo= ifelse(elemento_constitutivo == "Especimen Disecado", "Especimen disecado", elemento_constitutivo),
+         elemento_constitutivo= ifelse(elemento_constitutivo == "piel", "Piel", elemento_constitutivo)) %>% 
   group_by(clase, elemento_constitutivo, unidad) %>% 
   summarise(n = sum(cantidad)) %>% 
   ungroup() %>% 
@@ -251,6 +310,13 @@ r1 %>%
 ```{r echo=F, message=F, warning=F, results='markup'}
 t15 <- r1 %>% 
   filter(elemento_retenido == "Elementos constitutivos") %>% 
+  mutate(cantidad = case_when(elemento_constitutivo == "4 especímenes muertos" ~ 4,
+                              is.na(cantidad) & !is.na(nro_indeterminados) ~ nro_indeterminados,
+                              is.na(cantidad) ~ 1,
+                              T ~ cantidad),
+         elemento_constitutivo = ifelse(is.na(elemento_constitutivo), "No declarado", elemento_constitutivo),
+         elemento_constitutivo= ifelse(elemento_constitutivo == "Especimen Disecado", "Especimen disecado", elemento_constitutivo),
+         elemento_constitutivo= ifelse(elemento_constitutivo == "piel", "Piel", elemento_constitutivo)) %>% 
   group_by(clase, elemento_constitutivo, unidad) %>% 
   summarise(n = sum(cantidad)) %>% 
   ungroup() %>% 
@@ -407,6 +473,13 @@ T02.- Provincias total por año MAATE RETENCIONES VS UPMA
 ```{r echo=F, message=F, warning=F, results='markup'}
 r1 %>% 
   filter(reino == "Plantae") %>% 
+  mutate(rnatura = case_when(provincia %in% c("01", "02", "03", "04", "05", 
+                                              "06", "10", "11", "17", "18") ~ "Sierra",
+                             provincia %in% c("07", "08", "09", "12", "13", 
+                                              "20", "23", "24") ~ "Costa",
+                             provincia %in% c("14", "15", "16", "19", "21", 
+                                              "22") ~ "Amazonía",
+                             T ~ "Niidea")) %>% 
   group_by(provincia, anio_retencion) %>% 
   summarise(n=n()) %>% 
   ungroup() %>% 
@@ -416,6 +489,13 @@ r1 %>%
 ```{r echo=F, message=F, warning=F, results='markup'}
 r1 %>% 
   filter(reino == "Plantae") %>% 
+  mutate(rnatura = case_when(provincia %in% c("01", "02", "03", "04", "05", 
+                                              "06", "10", "11", "17", "18") ~ "Sierra",
+                             provincia %in% c("07", "08", "09", "12", "13", 
+                                              "20", "23", "24") ~ "Costa",
+                             provincia %in% c("14", "15", "16", "19", "21", 
+                                              "22") ~ "Amazonía",
+                             T ~ "Niidea")) %>% 
   group_by(rnatura, provincia, anio_retencion) %>%
   summarise(n = n()) %>%
   ungroup() %>%

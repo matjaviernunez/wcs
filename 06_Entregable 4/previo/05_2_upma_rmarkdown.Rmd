@@ -1,0 +1,618 @@
+---
+title: Unidad de Policía del Medio Ambiente (UPMA)
+output:
+  html_document:
+    number_sections: yes
+    toc: yes
+    theme: bootstrap
+    highlight: tango
+    df_print: kable
+  pdf_document:
+    toc: yes
+    df_print: kable
+    number_sections: no
+header-includes: \renewcommand{\contentsname}{Contenido}
+params:
+  mes: NULL
+date: "2025-06-02"
+---
+
+```{r echo=F, message=F, warning=F, results='markup'}
+library(tidyverse)
+library(rio)
+library(sf)
+library(janitor)
+```
+
+A continuación se presentan las tablas y gráficos solicitados a partir de la base de UPMA separado en dos grandes secciones, Continente y Galápagos.
+
+# Continente
+
+## Flora
+
+Para la presentación de los resultados de flora se utilizó el archivo "FORMATO DGO UPMA  FLORA 2022, 2023 Y 2024.xlsx".
+
+### T01 - Número de decomisos (eventos) MAATE RETENCIONES VS UPMA por año
+
+```{r echo=F, message=F, warning=F, results='markup'}
+tab_01_con_flo_eve <- upma_flora_01 %>% 
+  filter(substr(subcircuito, 1, 2) != "20") %>% 
+  group_by(anio = substr(fecha_rescate, 1, 4)) %>% 
+  summarise(evento = n()) %>% 
+  adorn_totals()
+
+tab_01_con_flo_eve
+```
+
+```{r echo=F, message=F, warning=F, results='markup'}
+fig_01_con_flo_eve <- tab_01_con_flo_eve |> 
+  filter(anio != "Total") |> 
+  mutate(anio = as.numeric(anio)) |> 
+  ggplot(aes(x = anio, y = evento)) +
+  geom_line() +
+  theme_light()
+
+fig_01_con_flo_eve
+```
+
+### T02 - Provincias total por año MAATE RETENCIONES VS UPMA
+
+Número de decomisos de madera por provincia 
+
+```{r echo=F, message=F, warning=F, results='markup'}
+
+tab_02_con_flo_eve <- upma_flora_01 %>% 
+  mutate(cod_pro = substr(subcircuito, 1, 2),
+         rnatura = case_when(cod_pro %in% c("01", "02", "03", "04", "05", 
+                                            "06", "10", "11", "17", "18") ~ "Sierra",
+                             cod_pro %in% c("07", "08", "09", "12", "13", 
+                                            "20", "23", "24") ~ "Costa",
+                             cod_pro %in% c("14", "15", "16", "19", "21", 
+                                            "22") ~ "Amazonía",
+                             T ~ "Niidea")) |> 
+  group_by(anio = substr(fecha_rescate, 1, 4), rnatura, cod_pro) %>% 
+  summarise(evento = n()) %>% 
+  filter(cod_pro != "20") %>% 
+  pivot_wider(names_from = anio, values_from = evento) %>% 
+  adorn_totals() %>% 
+  adorn_totals("col") |> 
+  arrange(rnatura, desc(Total))
+tab_02_con_flo_eve
+```
+
+```{r echo=F, message=F, warning=F, results='markup'}
+fig_02_con_flo_eve <- tab_02_con_flo_eve |> 
+  mutate(prov_ordenado = reorder_within(cod_pro, Total, rnatura)) |> 
+  filter(rnatura != "Total") %>%
+  ggplot(aes(fill = cod_pro)) + 
+  geom_col(aes(prov_ordenado, Total),
+           linewidth = 1.5,
+           position = position_dodge()) +
+  coord_flip() +
+  facet_wrap(~ rnatura, scales = "free_y") + 
+  scale_x_reordered(labels = function(x) gsub("__.+$", "", x)) +
+  theme_light() 
+
+fig_02_con_flo_eve
+```
+
+### T09 - Kg de carne de monte decomisada en total (equivalente madera)
+
+```{r echo=F, message=F, warning=F, results='markup'}
+
+tab_09_con_flo_can <- upma_flora_01 %>% 
+  filter(substr(subcircuito, 1, 2) != "20") %>% 
+  group_by(anio = substr(fecha_rescate, 1, 4)) %>% 
+  summarise(cantidad = sum(cantidad)) %>% 
+  adorn_totals()
+
+tab_09_con_flo_can
+```
+
+```{r echo=F, message=F, warning=F, results='markup'}
+fig_09_con_flo_can <- tab_09_con_flo_can |> 
+  filter(anio != "Total") |> 
+  mutate(anio = as.numeric(anio)) |> 
+  ggplot(aes(x = anio, y = cantidad)) +
+  geom_line() + 
+  theme_light()
+
+fig_09_con_flo_can
+```
+
+
+
+
+
+### T10 - Kg de carne de monte decomisada por Taxones (Maderable no maderable)
+
+```{r echo=F, message=F, warning=F, results='markup'}
+
+tab_10_con_flo_can <- upma_flora_01 %>% 
+  filter(substr(subcircuito, 1, 2) != "20") %>% 
+  group_by(anio = substr(fecha_rescate, 1, 4),sub_categoria) %>% 
+  summarise(cantidad = sum(cantidad)) 
+
+tab_10_con_flo_can %>% 
+  pivot_wider(names_from = sub_categoria, values_from = cantidad) %>% 
+  adorn_totals() %>% 
+  adorn_totals("col")
+```
+
+```{r echo=F, message=F, warning=F, results='markup'}
+fig_10_con_flo_can <- tab_10_con_flo_can |> 
+  ggplot() +
+  geom_col(aes(anio, cantidad, fill = anio),
+           linewidth = 1.5,
+           position = position_dodge()) +
+  coord_flip() +
+  facet_wrap(~ sub_categoria, scales = "free_y") + 
+  theme_light() +
+  scale_x_reordered(labels = function(x) gsub("__.+$", "", x)) +
+  theme_light()
+
+fig_10_con_flo_can
+```
+
+
+
+
+
+### T11 - Kg de carne de monte decomisada por provincias (Madera)
+
+```{r echo=F, message=F, warning=F, results='markup'}
+
+tab_11_con_flo_can <- upma_flora_01 %>% 
+  filter(substr(subcircuito, 1, 2) != "20") %>% 
+  group_by(anio = substr(fecha_rescate, 1, 4),cod_pro = substr(subcircuito, 1, 2)) %>% 
+  summarise(cantidad = sum(cantidad))
+
+tab_11_con_flo_can %>% 
+  pivot_wider(names_from = anio, values_from = cantidad) %>% 
+  adorn_totals() %>% 
+  adorn_totals("col")
+```
+
+```{r echo=F, message=F, warning=F, results='markup'}
+fig_11_con_flo_can <- provincias |> 
+  filter(DPA_PROVIN != "20") |> 
+  left_join(tab_11_con_flo_can |> 
+              group_by(DPA_PROVIN = cod_pro) |> 
+              summarise(cantidad = sum(cantidad)),
+            by = "DPA_PROVIN") |> 
+  ggplot() + 
+  geom_sf(aes(fill = cantidad)) +
+  scale_fill_distiller(trans = "reverse") +
+  theme_light()
+  
+fig_11_con_flo_can
+```
+
+
+
+
+
+### T12 - Kg de carne de monte decomisada 5 o 10 sp con mayor cantidad (árboles)
+
+```{r echo=F, message=F, warning=F, results='markup'}
+
+tab_12_con_flo_can <- upma_flora_01 %>% 
+  filter(substr(subcircuito, 1, 2) != "20") %>% 
+  group_by(n_tipo_1) %>% 
+  summarise(cantidad = sum(cantidad)) %>% 
+  arrange(desc(cantidad))
+
+tab_12_con_flo_can |> 
+  filter(row_number() <= 10)
+
+```
+### T12_1 - Kg de carne de monte decomisada 5 o 10 sp con mayor cantidad (árboles) maderable
+
+```{r echo=F, message=F, warning=F, results='markup'}
+
+tab_12_con_flo_can_mad <- upma_flora_01 %>% 
+  filter(substr(subcircuito, 1, 2) != "20", sub_categoria == "MADERABLE") %>% 
+  group_by(n_tipo_1) %>% 
+  summarise(cantidad = sum(cantidad)) %>% 
+  arrange(desc(cantidad))
+
+tab_12_con_flo_can_mad |> 
+  filter(row_number() <= 10)
+
+```
+### T12_2 - Kg de carne de monte decomisada 5 o 10 sp con mayor cantidad (árboles) no maderable
+
+```{r echo=F, message=F, warning=F, results='markup'}
+
+tab_12_con_flo_can_nmad <- upma_flora_01 %>% 
+  filter(substr(subcircuito, 1, 2) != "20", sub_categoria == "NO MADERABLE") %>% 
+  group_by(n_tipo_1) %>% 
+  summarise(cantidad = sum(cantidad)) %>% 
+  arrange(desc(cantidad))
+
+tab_12_con_flo_can_nmad |> 
+  filter(row_number() <= 10)
+
+```
+
+
+
+
+
+
+## Fauna
+
+Para la presentación de los resultados de fauna se utilizó el archivo "FAUNA SILVESTRE CON CARNE DE MONTE.xlsx", para rescates se usó "RESCATE DE FAUNA SILVESTRE 2019 AL 2024.xlsx"
+
+### T01 - Número de decomisos (eventos) MAATE RETENCIONES VS UPMA por año
+
+```{r echo=F, message=F, warning=F, results='markup'}
+tab_01_con_fau_eve <- upma %>% 
+  filter(cod_pro != "20") %>% 
+  group_by(anio) %>% 
+  summarise(evento = n_distinct(numero_parte)) %>% 
+  adorn_totals()
+
+tab_01_con_fau_eve
+```
+
+```{r echo=F, message=F, warning=F, results='markup'}
+fig_01_con_fau_eve <- tab_01_con_fau_eve |> 
+  filter(anio != "Total") |> 
+  mutate(anio = as.numeric(anio)) |> 
+  ggplot(aes(x = anio, y = evento)) +
+  geom_line() +
+  theme_light()
+
+fig_01_con_fau_eve
+```
+
+### T02 - Provincias total por año MAATE RETENCIONES VS UPMA
+
+```{r echo=F, message=F, warning=F, results='markup'}
+
+tab_02_con_fau_eve <- upma %>% 
+  mutate(rnatura = case_when(cod_pro %in% c("01", "02", "03", "04", "05", 
+                                            "06", "10", "11", "17", "18") ~ "Sierra",
+                             cod_pro %in% c("07", "08", "09", "12", "13", 
+                                            "20", "23", "24") ~ "Costa",
+                             cod_pro %in% c("14", "15", "16", "19", "21", 
+                                            "22") ~ "Amazonía",
+                             T ~ "Niidea")) |> 
+  group_by(anio, rnatura, cod_pro) %>% 
+  summarise(evento = n_distinct(numero_parte)) %>% 
+  filter(cod_pro != "20") %>% 
+  pivot_wider(names_from = anio, values_from = evento) %>% 
+  adorn_totals() %>% 
+  adorn_totals("col") |> 
+  arrange(rnatura, desc(Total))
+
+tab_02_con_fau_eve
+```
+
+```{r echo=F, message=F, warning=F, results='markup'}
+fig_02_con_fau_eve <- tab_02_con_fau_eve |> 
+  mutate(prov_ordenado = reorder_within(cod_pro, Total, rnatura)) |> 
+  filter(rnatura != "Total") %>%
+  ggplot() + 
+  geom_col(aes(prov_ordenado, Total, fill = cod_pro),
+           linewidth = 1.5,
+           position = position_dodge()) +
+  coord_flip() +
+  facet_wrap(~ rnatura, scales = "free_y") + 
+  theme_light() +
+  scale_x_reordered(labels = function(x) gsub("__.+$", "", x)) +
+  theme_light()
+
+fig_02_con_fau_eve
+```
+
+### T07 - Número de especímenes vivos decomisados por grupo taxonómico misma tendencia?
+
+```{r echo=F, message=F, warning=F, results='markup'}
+
+tab_07_con_fau_eve <- upma_rescate %>% 
+  filter(cod_pro != "20") %>% 
+  group_by(subcategoria, anio) %>% 
+  summarise(evento = n_distinct(NUMERO_PARTE)) 
+
+tab_07_con_fau_eve |> pivot_wider(names_from = anio, values_from = evento) %>% 
+  adorn_totals("col") |> 
+  arrange(desc(Total)) |> 
+  adorn_totals()
+```
+
+```{r echo=F, message=F, warning=F, results='markup'}
+fig_07_con_fau_eve <- tab_07_con_fau_eve |> 
+  group_by(subcategoria) |> 
+  summarise(Total = sum(evento)) |> 
+  mutate(subcategoria = factor(subcategoria,
+                            c("REPTIL", "AVE", "MAMIFERO", "OTROS"),
+                            c("REPTIL", "AVE", "MAMIFERO", "OTROS"))) %>% 
+  ggplot() + 
+  geom_col(aes(subcategoria, Total, fill = subcategoria),
+           linewidth = 1.5,
+           position = position_dodge()) +
+  theme_light()
+
+fig_07_con_fau_eve
+```
+
+
+### T09 - Kg de carne de monte decomisada en total (equivalente madera)
+
+```{r echo=F, message=F, warning=F, results='markup'}
+
+tab_09_con_fau_can <- upma_carne %>% 
+  filter(cod_pro != "20") %>% 
+  group_by(anio) %>% 
+  summarise(cantidad = sum(cantidad)) 
+
+tab_09_con_fau_can %>% 
+  adorn_totals()
+```
+
+```{r echo=F, message=F, warning=F, results='markup'}
+fig_09_con_fau_can <- tab_09_con_fau_can |> 
+  mutate(anio = as.numeric(anio)) |> 
+  ggplot(aes(x = anio, y = cantidad)) +
+  geom_line() + 
+  theme_light()
+
+fig_09_con_fau_can
+```
+
+
+
+
+
+### T10 - Kg de carne de monte decomisada por Taxones (Maderable no maderable)
+
+No se recomienda usar esta tabla pues no está adecuadamente categorizada
+
+```{r echo=F, message=F, warning=F, results='markup'}
+
+tab_10_con_fau_can <- upma_carne %>% 
+  filter(cod_pro != "20") %>% 
+  group_by(familia_especimen) %>% 
+  summarise(cantidad = sum(cantidad))
+tab_10_con_fau_can
+```
+
+
+
+
+
+
+### T11 - Kg de carne de monte decomisada por provincias (Madera)
+
+```{r echo=F, message=F, warning=F, results='markup'}
+
+tab_11_con_fau_can <- upma_carne %>% 
+  filter(cod_pro != "20") %>% 
+  group_by(anio, cod_pro) %>% 
+  summarise(cantidad = sum(cantidad)) 
+
+tab_11_con_fau_can %>% 
+  pivot_wider(names_from = anio, values_from = cantidad, values_fill = 0) %>%  
+  adorn_totals("col") |> 
+  arrange(desc(Total)) |> 
+  adorn_totals()
+  
+```
+
+```{r echo=F, message=F, warning=F, results='markup'}
+fig_11_con_fau_can <- provincias |> 
+  filter(DPA_PROVIN != "20") |> 
+  left_join(tab_11_con_fau_can |> 
+              group_by(DPA_PROVIN = cod_pro) |> 
+              summarise(cantidad = sum(cantidad)),
+            by = "DPA_PROVIN") |> 
+  ggplot() + 
+  geom_sf(aes(fill = cantidad)) +
+  scale_fill_distiller(trans = "reverse") +
+  theme_light()
+
+fig_11_con_fau_can
+```
+
+
+
+
+
+### T12 - Kg de carne de monte decomisada 5 o 10 sp con mayor cantidad (árboles)
+
+```{r echo=F, message=F, warning=F, results='markup'}
+
+tab_12_con_fau_can <- upma_carne %>% 
+  filter(cod_pro != "20") %>% 
+  group_by(tipo_especimen_1) %>% 
+  summarise(cantidad = sum(cantidad)) %>% 
+  arrange(desc(cantidad))
+
+tab_12_con_fau_can |> 
+  filter(row_number() <= 10)
+
+```
+
+
+
+
+
+
+
+# Galápagos
+
+## Flora
+
+Para la presentación de los resultados de flora se utilizó el archivo "FORMATO DGO UPMA  FLORA 2022, 2023 Y 2024.xlsx".
+
+### T01 - Número de decomisos (eventos) MAATE RETENCIONES VS UPMA por año
+
+```{r echo=F, message=F, warning=F, results='markup'}
+tab_01_gal_flo_eve <- upma_flora_01 %>% 
+  filter(substr(subcircuito, 1, 2) == "20") %>% 
+  group_by(anio = substr(fecha_rescate, 1, 4)) %>% 
+  summarise(evento = n()) %>% 
+  adorn_totals()
+
+tab_01_gal_flo_eve
+```
+
+```{r echo=F, message=F, warning=F, results='markup'}
+fig_01_gal_flo_eve <- tab_01_gal_flo_eve |> 
+  filter(anio != "Total") |> 
+  mutate(anio = as.numeric(anio)) |> 
+  ggplot(aes(x = anio, y = evento)) +
+  geom_line() +
+  theme_light()
+
+fig_01_gal_flo_eve
+```
+
+
+### T09 - Kg de carne de monte decomisada en total (equivalente madera)
+
+```{r echo=F, message=F, warning=F, results='markup'}
+
+tab_09_gal_flo_can <- upma_flora_01 %>% 
+  filter(substr(subcircuito, 1, 2) == "20") %>% 
+  group_by(anio = substr(fecha_rescate, 1, 4)) %>% 
+  summarise(cantidad = sum(cantidad)) %>% 
+  adorn_totals()
+
+tab_09_gal_flo_can
+```
+
+```{r echo=F, message=F, warning=F, results='markup'}
+fig_09_gal_flo_can <- tab_09_gal_flo_can |> 
+  filter(anio != "Total") |> 
+  mutate(anio = as.numeric(anio)) |> 
+  ggplot(aes(x = anio, y = cantidad)) +
+  geom_line() + 
+  theme_light()
+
+fig_09_gal_flo_can
+```
+
+
+
+
+
+### T10 - Kg de carne de monte decomisada por Taxones (Maderable no maderable)
+
+```{r echo=F, message=F, warning=F, results='markup'}
+
+tab_10_gal_flo_can <- upma_flora_01 %>% 
+  filter(substr(subcircuito, 1, 2) == "20") %>% 
+  group_by(anio = substr(fecha_rescate, 1, 4),sub_categoria) %>% 
+  summarise(cantidad = sum(cantidad)) 
+
+tab_10_gal_flo_can %>% 
+  pivot_wider(names_from = sub_categoria, values_from = cantidad, values_fill = 0) %>% 
+  adorn_totals() %>% 
+  adorn_totals("col")
+```
+
+```{r echo=F, message=F, warning=F, results='markup'}
+fig_10_gal_flo_can <- tab_10_gal_flo_can |> 
+  ggplot() +
+  geom_col(aes(anio, cantidad, fill = anio),
+           linewidth = 1.5,
+           position = position_dodge()) +
+  coord_flip() +
+  facet_wrap(~ sub_categoria, scales = "free_y") + 
+  theme_light() +
+  scale_x_reordered(labels = function(x) gsub("__.+$", "", x)) +
+  theme_light()
+
+fig_10_gal_flo_can
+```
+
+
+
+
+
+### T12 - Kg de carne de monte decomisada 5 o 10 sp con mayor cantidad (árboles)
+
+```{r echo=F, message=F, warning=F, results='markup'}
+
+tab_12_gal_flo_can <- upma_flora_01 %>% 
+  filter(substr(subcircuito, 1, 2) == "20") %>% 
+  group_by(n_tipo_1) %>% 
+  summarise(cantidad = sum(cantidad)) %>% 
+  arrange(desc(cantidad))
+
+tab_12_gal_flo_can |> 
+  filter(row_number() <= 10)
+
+```
+
+
+
+
+
+
+
+
+
+## Fauna
+
+Para la presentación de los resultados de fauna se utilizó el archivo "FAUNA SILVESTRE CON CARNE DE MONTE.xlsx", para rescates se usó "RESCATE DE FAUNA SILVESTRE 2019 AL 2024.xlsx"
+
+### T01 - Número de decomisos (eventos) MAATE RETENCIONES VS UPMA por año
+
+```{r echo=F, message=F, warning=F, results='markup'}
+tab_01_gal_fau_eve <- upma %>% 
+  filter(cod_pro == "20") %>% 
+  group_by(anio) %>% 
+  summarise(evento = n_distinct(numero_parte)) %>% 
+  adorn_totals()
+
+tab_01_gal_fau_eve
+```
+
+```{r echo=F, message=F, warning=F, results='markup'}
+fig_01_gal_fau_eve <- tab_01_gal_fau_eve |> 
+  filter(anio != "Total") |> 
+  mutate(anio = as.numeric(anio)) |> 
+  ggplot(aes(x = anio, y = evento)) +
+  geom_line() +
+  theme_light()
+
+fig_01_gal_fau_eve
+```
+
+
+
+### T07 - Número de especímenes vivos decomisados por grupo taxonómico misma tendencia?
+
+```{r echo=F, message=F, warning=F, results='markup'}
+
+tab_07_gal_fau_eve <- upma_rescate %>% 
+  filter(cod_pro == "20") %>% 
+  group_by(subcategoria, anio) %>% 
+  summarise(evento = n_distinct(NUMERO_PARTE)) 
+
+tab_07_gal_fau_eve |> pivot_wider(names_from = anio, values_from = evento, values_fill = 0) %>% 
+  adorn_totals("col") |> 
+  arrange(desc(Total)) |> 
+  adorn_totals() 
+  
+```
+
+```{r echo=F, message=F, warning=F, results='markup'}
+fig_07_gal_fau_eve <- tab_07_gal_fau_eve |> 
+  group_by(subcategoria) |> 
+  summarise(Total = sum(evento)) |> 
+  mutate(subcategoria = factor(subcategoria,
+                            c("REPTIL", "MAMIFERO", "AVE", "OTROS"),
+                            c("REPTIL", "MAMIFERO", "AVE", "OTROS"))) %>% 
+  ggplot() + 
+  geom_col(aes(subcategoria, Total, fill = subcategoria),
+           linewidth = 1.5,
+           position = position_dodge()) +
+  theme_light()
+
+fig_07_gal_fau_eve
+```
